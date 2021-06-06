@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.example.notebook.database.Note;
-import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class NewNoteFragment extends Fragment {
     EditText title;
@@ -31,7 +31,7 @@ public class NewNoteFragment extends Fragment {
 
         title = view.findViewById(R.id.et_edit_new_note_title);
         content = view.findViewById(R.id.et_edit_new_note_content);
-        MaterialButton saveButton = view.findViewById(R.id.btn_save_new_note);
+        FloatingActionButton saveButton = view.findViewById(R.id.btn_save_new_note);
 
         saveButton.setOnClickListener(v ->
                 validateInput()

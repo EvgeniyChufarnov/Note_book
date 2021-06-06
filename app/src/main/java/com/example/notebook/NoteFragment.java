@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.example.notebook.database.Note;
-import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class NoteFragment extends Fragment {
     private static final String NOTE_KEY = "note";
@@ -48,8 +48,8 @@ public class NoteFragment extends Fragment {
         title = view.findViewById(R.id.tv_note_title);
         content = view.findViewById(R.id.tv_note_content);
         date = view.findViewById(R.id.tv_note_date);
-        MaterialButton editButton = view.findViewById(R.id.btn_edit_note);
-        MaterialButton deleteButton = view.findViewById(R.id.btn_delete_note);
+        FloatingActionButton editButton = view.findViewById(R.id.btn_edit_note);
+        FloatingActionButton deleteButton = view.findViewById(R.id.btn_delete_note);
 
         setViews();
 

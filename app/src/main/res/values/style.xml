@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="title_text">
+        <item name="android:textSize">@dimen/title_text_size</item>
+    </style>
+
+    <style name="content_text">
+        <item name="android:textSize">@dimen/content_text_size</item>
+    </style>
+
+    <style name="date_text">
+        <item name="android:textSize">@dimen/date_text_size</item>
+    </style>
+</resources>

@@ -8,19 +8,19 @@
     android:background="@color/white"
     android:clickable="true"
     android:focusable="true"
-    android:orientation="vertical"
-    android:padding="@dimen/main_margin">
+    android:orientation="vertical">
 
     <EditText
         android:id="@+id/et_edit_new_note_title"
+        style="@style/title_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="@dimen/main_margin"
         android:hint="@string/title_hint"
         android:importantForAutofill="no"
         android:inputType="textMultiLine"
         android:maxLength="15"
         android:textAlignment="center"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline3"
         app:layout_constraintBottom_toTopOf="@+id/sv_scroll_content"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Note#1" />
@@ -29,26 +29,31 @@
         android:id="@+id/sv_scroll_content"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_margin="@dimen/main_margin"
         app:layout_constraintBottom_toTopOf="@id/btn_save_new_note"
         app:layout_constraintTop_toBottomOf="@id/et_edit_new_note_title">
 
         <EditText
             android:id="@+id/et_edit_new_note_content"
+            style="@style/content_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/content_hint"
             android:importantForAutofill="no"
             android:inputType="textMultiLine"
             android:textAlignment="textStart"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             tools:text="Some content" />
     </ScrollView>
 
-    <com.google.android.material.button.MaterialButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btn_save_new_note"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/save"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:layout_margin="@dimen/main_margin"
+        android:contentDescription="@string/save"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/ic_save" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 

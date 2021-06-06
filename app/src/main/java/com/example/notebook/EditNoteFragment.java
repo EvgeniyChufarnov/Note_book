@@ -12,7 +12,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
 import com.example.notebook.database.Note;
-import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class EditNoteFragment extends Fragment implements DatePickerFragment.DateReceiver {
     private static final String NOTE_KEY = "note";
@@ -50,7 +50,7 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
         title = view.findViewById(R.id.et_edit_note_title);
         content = view.findViewById(R.id.et_edit_note_content);
         date = view.findViewById(R.id.tv_edit_note_date);
-        MaterialButton saveButton = view.findViewById(R.id.btn_save_note);
+        FloatingActionButton saveButton = view.findViewById(R.id.btn_save_note);
 
         title.setText(note.getTitle());
         content.setText(note.getContent());
