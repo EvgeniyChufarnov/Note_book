@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements NotesController {
         }
     }
 
-    public void initNotesList() {
+    private void initNotesList() {
         NoteListFragment noteListFragment = new NoteListFragment();
 
         fragmentManager.beginTransaction()
