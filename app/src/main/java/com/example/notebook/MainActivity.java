@@ -15,7 +15,7 @@ import org.greenrobot.eventbus.EventBus;
 
 public class MainActivity extends AppCompatActivity implements NotesController {
     private static final int LANDSCAPE_BACKSTACK_LIMIT = 1;
-    FragmentManager fragmentManager = getSupportFragmentManager();
+    private final FragmentManager fragmentManager = getSupportFragmentManager();
     private boolean isLandscape = false;
     private NotesViewModel viewModel;
 
