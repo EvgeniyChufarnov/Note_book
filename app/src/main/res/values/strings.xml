@@ -7,4 +7,8 @@
     <string name="title_hint">Название</string>
     <string name="save">Сохранить</string>
     <string name="content_hint">Заметка</string>
+    <string name="notes">Заметки</string>
+    <string name="new_one">Новая заметка</string>
+    <string name="about">О приложении</string>
+    <string name="about_app_text">Здесь могла быть ваша реклама</string>
 </resources>

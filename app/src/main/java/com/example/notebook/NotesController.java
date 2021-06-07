@@ -11,7 +11,5 @@ public interface NotesController {
 
     void openNote(Note note);
 
-    void openNoteToAdd();
-
     void openNoteToChange(Note note);
 }

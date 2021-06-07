@@ -39,10 +39,6 @@ public class NoteListFragment extends Fragment {
         adapter = new NotesListAdapter(new NotesListAdapter.NoteDiff(), notesController);
         recyclerView.setAdapter(adapter);
         adapter.submitList(notes);
-
-        view.findViewById(R.id.btn_add_new_note).setOnClickListener(v ->
-                notesController.openNoteToAdd()
-        );
     }
 
     @Override
