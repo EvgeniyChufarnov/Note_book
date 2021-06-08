@@ -28,6 +28,7 @@ public class Note implements Parcelable {
     };
     @Ignore
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault());
+    @ColumnInfo(name = "id")
     @PrimaryKey(autoGenerate = true)
     public long id = 0L;
     @ColumnInfo(name = "title")
