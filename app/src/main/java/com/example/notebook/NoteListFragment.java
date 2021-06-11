@@ -1,5 +1,6 @@
 package com.example.notebook;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,15 +20,15 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class NoteListFragment extends Fragment {
-    private NotesController notesController;
+    private RecyclerView recyclerView;
     private NotesListAdapter adapter;
     private List<Note> notes = new ArrayList<>();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        notesController = (NotesController) getActivity();
         return inflater.inflate(R.layout.fragment_notes_list, container, false);
     }
 
@@ -35,13 +36,13 @@ public class NoteListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        RecyclerView recyclerView = view.findViewById(R.id.rv_notes_list);
-        adapter = new NotesListAdapter(new NotesListAdapter.NoteDiff(), notesController);
+        recyclerView = view.findViewById(R.id.rv_notes_list);
+        adapter = new NotesListAdapter(new NotesListAdapter.NoteDiff(), this::onListItemClicked);
         recyclerView.setAdapter(adapter);
         adapter.submitList(notes);
 
         view.findViewById(R.id.btn_add_new_note).setOnClickListener(v ->
-                notesController.openNoteToAdd()
+                ((Contract) requireActivity()).openNoteToAdd()
         );
     }
 
@@ -61,5 +62,28 @@ public class NoteListFragment extends Fragment {
     public void onMessageEvent(ListUpdateEvent event) {
         notes = event.notes;
         adapter.submitList(event.notes);
+        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                recyclerView.scrollToPosition(positionStart);
+            }
+        });
+    }
+
+    private void onListItemClicked(Note note) {
+        ((Contract) requireActivity()).openNote(note);
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (!(getActivity() instanceof Contract)) {
+            throw new IllegalStateException("Activity must implement NoteListFragment.Contract");
+        }
+    }
+
+    public interface Contract {
+        void openNote(Note note);
+        void openNoteToAdd();
     }
 }

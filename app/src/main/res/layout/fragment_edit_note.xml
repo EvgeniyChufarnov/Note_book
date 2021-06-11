@@ -53,15 +53,5 @@
         android:textAlignment="viewStart"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:text="01.01.2021" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btn_save_note"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/main_margin"
-        android:contentDescription="@string/save"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_save" />
 </androidx.constraintlayout.widget.ConstraintLayout>
 

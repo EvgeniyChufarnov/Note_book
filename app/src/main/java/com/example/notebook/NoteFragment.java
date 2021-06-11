@@ -1,20 +1,24 @@
 package com.example.notebook;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.notebook.database.Note;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class NoteFragment extends Fragment {
-    private static final String NOTE_KEY = "note";
-    private NotesController notesController;
+    private static final String NOTE_EXTRA_KEY = "note";
     private Note note;
 
     private TextView title;
@@ -24,7 +28,7 @@ public class NoteFragment extends Fragment {
     public static NoteFragment getInstance(Note note) {
         NoteFragment noteFragment = new NoteFragment();
         Bundle bundle = new Bundle();
-        bundle.putParcelable(NOTE_KEY, note);
+        bundle.putParcelable(NOTE_EXTRA_KEY, note);
         noteFragment.setArguments(bundle);
         return noteFragment;
     }
@@ -32,11 +36,9 @@ public class NoteFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle arguments = getArguments();
-        if (arguments != null && arguments.containsKey(NOTE_KEY)) {
-            note = arguments.getParcelable(NOTE_KEY);
+        if (arguments != null && arguments.containsKey(NOTE_EXTRA_KEY)) {
+            note = arguments.getParcelable(NOTE_EXTRA_KEY);
         }
-
-        notesController = (NotesController) getActivity();
 
         return inflater.inflate(R.layout.fragment_note, container, false);
     }
@@ -48,23 +50,58 @@ public class NoteFragment extends Fragment {
         title = view.findViewById(R.id.tv_note_title);
         content = view.findViewById(R.id.tv_note_content);
         date = view.findViewById(R.id.tv_note_date);
-        FloatingActionButton editButton = view.findViewById(R.id.btn_edit_note);
-        FloatingActionButton deleteButton = view.findViewById(R.id.btn_delete_note);
 
         setViews();
+    }
 
-        editButton.findViewById(R.id.btn_edit_note).setOnClickListener(v ->
-                notesController.openNoteToChange(note)
-        );
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
-        deleteButton.findViewById(R.id.btn_delete_note).setOnClickListener(v ->
-                notesController.deleteNote(note)
-        );
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_note, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_item_edit_note) {
+            ((Contract) requireActivity()).openNoteToChange(note);
+        } else if (item.getItemId() == R.id.menu_item_delete_note) {
+            ((Contract) requireActivity()).deleteNote(note);
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ((Contract) requireActivity()).backToList();
     }
 
     private void setViews() {
         title.setText(note.getTitle());
         content.setText(note.getContent());
         date.setText(note.getDate());
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (!(getActivity() instanceof NoteListFragment.Contract)) {
+            throw new IllegalStateException("Activity must implement NoteFragment.Contract");
+        }
+    }
+
+    public interface Contract {
+        void openNoteToChange(Note note);
+
+        void deleteNote(Note note);
+
+        void backToList();
     }
 }
