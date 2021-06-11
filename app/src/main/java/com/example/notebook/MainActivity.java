@@ -2,31 +2,34 @@ package com.example.notebook;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.view.MenuItem;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.notebook.database.Note;
 import com.example.notebook.events.ListUpdateEvent;
 import com.example.notebook.viewModels.NotesViewModel;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.greenrobot.eventbus.EventBus;
 
-public class MainActivity extends AppCompatActivity implements NotesController {
+public class MainActivity extends AppCompatActivity implements NoteListFragment.Contract,
+        NoteFragment.Contract, NewNoteFragment.Contract, EditNoteFragment.Contract {
+
     private static final int LANDSCAPE_BACKSTACK_LIMIT = 1;
     private final FragmentManager fragmentManager = getSupportFragmentManager();
     private boolean isLandscape = false;
     private NotesViewModel viewModel;
-    private BottomNavigationView bottomNavigationView;
+    private FrameLayout listContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        listContainer = findViewById(R.id.list_fragment_container);
 
         viewModel = new ViewModelProvider(this).get(NotesViewModel.class);
 
@@ -39,62 +42,16 @@ public class MainActivity extends AppCompatActivity implements NotesController {
             isLandscape = true;
         }
 
-        bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener(this::navigate);
-
         if (savedInstanceState == null) {
             initNotesList();
         }
-    }
 
-    private boolean navigate(MenuItem item) {
-        if (item.getItemId() == R.id.notes) {
-            navigateToNotesList();
-        } else if (item.getItemId() == R.id.new_one) {
-            navigateToNewNote();
-        } else if (item.getItemId() == R.id.about) {
-            navigateToAboutApp();
-        }
-        return true;
-    }
-
-    private void navigateToNotesList() {
-        removeAllFragments();
-    }
-
-    private void navigateToNewNote() {
-        removeAllFragments();
-
-        NewNoteFragment newNoteFragment = new NewNoteFragment();
-
-        fragmentManager.beginTransaction()
-                .replace(R.id.main_fragment_container, newNoteFragment)
-                .addToBackStack(null)
-                .commit();
-    }
-
-    private void navigateToAboutApp() {
-        removeAllFragments();
-
-        AboutAppFragment aboutAppFragment = new AboutAppFragment();
-
-        fragmentManager.beginTransaction()
-                .add(R.id.main_fragment_container, aboutAppFragment)
-                .commit();
-    }
-
-    private void removeAllFragments() {
-        for (Fragment fragment : fragmentManager.getFragments()) {
-            if (fragment instanceof NoteListFragment) {
-                continue;
-            }
-            if (fragment != null) {
-                fragmentManager.beginTransaction().remove(fragment).commit();
-            }
+        if (!isLandscape && fragmentManager.getFragments().size() > 1) {
+            listContainer.setVisibility(View.INVISIBLE);
         }
     }
 
-    public void initNotesList() {
+    private void initNotesList() {
         NoteListFragment noteListFragment = new NoteListFragment();
 
         fragmentManager.beginTransaction()
@@ -105,19 +62,31 @@ public class MainActivity extends AppCompatActivity implements NotesController {
     @Override
     public void addNote(Note note) {
         viewModel.insert(note);
-        bottomNavigationView.setSelectedItemId(R.id.notes);
+        fragmentManager.popBackStack();
+
+        if (!isLandscape) {
+            listContainer.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
     public void changeNote(Note note) {
         viewModel.insert(note);
         fragmentManager.popBackStack();
+
+        if (!isLandscape) {
+            listContainer.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
     public void deleteNote(Note note) {
         viewModel.delete(note);
         fragmentManager.popBackStack();
+
+        if (!isLandscape) {
+            listContainer.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -132,6 +101,28 @@ public class MainActivity extends AppCompatActivity implements NotesController {
                 .replace(R.id.main_fragment_container, noteFragment)
                 .addToBackStack(null)
                 .commit();
+
+        if (!isLandscape) {
+            listContainer.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @Override
+    public void openNoteToAdd() {
+        NewNoteFragment newNoteFragment = new NewNoteFragment();
+
+        if (isLandscape && fragmentManager.getFragments().size() > LANDSCAPE_BACKSTACK_LIMIT) {
+            fragmentManager.popBackStack();
+        }
+
+        fragmentManager.beginTransaction()
+                .replace(R.id.main_fragment_container, newNoteFragment)
+                .addToBackStack(null)
+                .commit();
+
+        if (!isLandscape) {
+            listContainer.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -142,5 +133,16 @@ public class MainActivity extends AppCompatActivity implements NotesController {
                 .replace(R.id.main_fragment_container, editNoteFragment)
                 .addToBackStack(null)
                 .commit();
+
+        if (!isLandscape) {
+            listContainer.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @Override
+    public void backToList() {
+        if (!isLandscape) {
+            listContainer.setVisibility(View.VISIBLE);
+        }
     }
 }

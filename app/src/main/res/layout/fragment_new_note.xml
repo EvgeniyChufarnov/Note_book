@@ -29,7 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="@dimen/main_margin"
-        app:layout_constraintBottom_toTopOf="@id/btn_save_new_note"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/et_edit_new_note_title">
 
         <EditText
@@ -43,16 +43,6 @@
             android:textAlignment="textStart"
             tools:text="Some content" />
     </ScrollView>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btn_save_new_note"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/main_margin"
-        android:contentDescription="@string/save"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_save" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
