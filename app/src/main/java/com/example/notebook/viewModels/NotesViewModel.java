@@ -25,6 +25,10 @@ public class NotesViewModel extends AndroidViewModel {
         return notes;
     }
 
+    public List<Note> getListOfNodes() {
+        return notes.getValue();
+    }
+
     public void insert(Note note) {
         repository.insert(note);
     }

@@ -4,10 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white"
-    android:clickable="true"
-    android:focusable="true">
+    android:layout_height="match_parent">
 
     <EditText
         android:id="@+id/et_edit_note_title"
@@ -50,7 +47,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/main_margin"
-        android:textAlignment="viewStart"
+        android:textAlignment="viewEnd"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:text="01.01.2021" />
 </androidx.constraintlayout.widget.ConstraintLayout>

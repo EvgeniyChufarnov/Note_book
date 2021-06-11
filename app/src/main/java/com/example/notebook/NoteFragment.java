@@ -1,8 +1,8 @@
 package com.example.notebook;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -52,6 +52,16 @@ public class NoteFragment extends Fragment {
         date = view.findViewById(R.id.tv_note_date);
 
         setViews();
+
+        view.setFocusableInTouchMode(true);
+        view.requestFocus();
+        view.setOnKeyListener((v, keyCode, event) -> {
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                ((Contract) requireActivity()).onBackFromNote();
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
@@ -77,12 +87,6 @@ public class NoteFragment extends Fragment {
         return true;
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ((Contract) requireActivity()).backToList();
-    }
-
     private void setViews() {
         title.setText(note.getTitle());
         content.setText(note.getContent());
@@ -102,6 +106,6 @@ public class NoteFragment extends Fragment {
 
         void deleteNote(Note note);
 
-        void backToList();
+        void onBackFromNote();
     }
 }
