@@ -20,15 +20,27 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class NoteListFragment extends Fragment {
-    private RecyclerView recyclerView;
+    private static final String NOTES_EXTRA_KEY = "note";
     private NotesListAdapter adapter;
     private List<Note> notes = new ArrayList<>();
 
+    public static NoteListFragment getInstance(ArrayList<Note> notes) {
+        NoteListFragment noteListFragment = new NoteListFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList(NOTES_EXTRA_KEY, notes);
+        noteListFragment.setArguments(bundle);
+        return noteListFragment;
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Bundle arguments = getArguments();
+        if (arguments != null && arguments.containsKey(NOTES_EXTRA_KEY)) {
+            notes = arguments.getParcelableArrayList(NOTES_EXTRA_KEY);
+        }
+
         return inflater.inflate(R.layout.fragment_notes_list, container, false);
     }
 
@@ -36,9 +48,15 @@ public class NoteListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        recyclerView = view.findViewById(R.id.rv_notes_list);
+        RecyclerView recyclerView = view.findViewById(R.id.rv_notes_list);
         adapter = new NotesListAdapter(new NotesListAdapter.NoteDiff(), this::onListItemClicked);
         recyclerView.setAdapter(adapter);
+        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                recyclerView.smoothScrollToPosition(positionStart);
+            }
+        });
         adapter.submitList(notes);
 
         view.findViewById(R.id.btn_add_new_note).setOnClickListener(v ->
@@ -62,12 +80,6 @@ public class NoteListFragment extends Fragment {
     public void onMessageEvent(ListUpdateEvent event) {
         notes = event.notes;
         adapter.submitList(event.notes);
-        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                recyclerView.scrollToPosition(positionStart);
-            }
-        });
     }
 
     private void onListItemClicked(Note note) {
@@ -84,6 +96,7 @@ public class NoteListFragment extends Fragment {
 
     public interface Contract {
         void openNote(Note note);
+
         void openNoteToAdd();
     }
 }

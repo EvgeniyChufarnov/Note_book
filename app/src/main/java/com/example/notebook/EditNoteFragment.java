@@ -17,7 +17,6 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
 import com.example.notebook.database.Note;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class EditNoteFragment extends Fragment implements DatePickerFragment.DateReceiver {
     private static final String NOTE_EXTRA_KEY = "note";

@@ -2,11 +2,9 @@ package com.example.notebook.adapters;
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -47,6 +45,7 @@ public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteVie
         private NoteViewHolder(ViewGroup parent, OnItemClicked clickListener) {
             super(LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.notes_list_item, parent, false));
+
             title = itemView.findViewById(R.id.tv_note_item_title);
             content = itemView.findViewById(R.id.tv_note_item_content);
             date = itemView.findViewById(R.id.tv_note_item_date);
