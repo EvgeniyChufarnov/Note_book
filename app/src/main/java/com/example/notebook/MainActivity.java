@@ -273,4 +273,13 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         }
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOTE_FLAG);
     }
+
+    public void hideKeyboard() {
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        View view = getCurrentFocus();
+        if (view == null) {
+            view = new View(this);
+        }
+        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOTE_FLAG);
+    }
 }
