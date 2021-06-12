@@ -10,7 +10,6 @@ import androidx.room.PrimaryKey;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 @Entity(tableName = "notes_table")
@@ -26,8 +25,6 @@ public class Note implements Parcelable {
             return new Note[size];
         }
     };
-    @Ignore
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault());
     @ColumnInfo(name = "id")
     @PrimaryKey(autoGenerate = true)
     public long id = 0L;
@@ -36,21 +33,19 @@ public class Note implements Parcelable {
     @ColumnInfo(name = "content")
     public String content;
     @ColumnInfo(name = "date")
-    public String date;
+    public long date;
 
     public Note(String title, String content) {
         this.title = title;
         this.content = content;
-
-        Date currentDate = Calendar.getInstance().getTime();
-        this.date = dateFormat.format(currentDate);
+        this.date = Calendar.getInstance().getTimeInMillis();
     }
 
     protected Note(Parcel in) {
         id = in.readLong();
         title = in.readString();
         content = in.readString();
-        date = in.readString();
+        date = in.readLong();
     }
 
     public long getId() {
@@ -73,11 +68,11 @@ public class Note implements Parcelable {
         this.content = content;
     }
 
-    public String getDate() {
+    public long getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(long date) {
         this.date = date;
     }
 
@@ -91,6 +86,6 @@ public class Note implements Parcelable {
         dest.writeLong(id);
         dest.writeString(title);
         dest.writeString(content);
-        dest.writeString(date);
+        dest.writeLong(date);
     }
 }

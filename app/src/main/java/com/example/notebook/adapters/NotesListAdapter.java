@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notebook.R;
 import com.example.notebook.database.Note;
+import com.example.notebook.utils.Utils;
 
 public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteViewHolder> {
     private final OnItemClicked clickListener;
@@ -56,7 +57,7 @@ public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteVie
             this.note = note;
             title.setText(note.getTitle());
             content.setText(note.getContent());
-            date.setText(note.getDate());
+            date.setText(Utils.dateLongToString(note.getDate()));
         }
     }
 
@@ -70,7 +71,7 @@ public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteVie
         public boolean areContentsTheSame(@NonNull Note oldItem, @NonNull Note newItem) {
             return oldItem.getContent().equals(newItem.getContent())
                     && oldItem.getTitle().equals(newItem.getTitle())
-                    && oldItem.getDate().equals(newItem.getDate());
+                    && oldItem.getDate() == newItem.getDate();
         }
     }
 }
