@@ -58,10 +58,6 @@ public class NoteListFragment extends Fragment {
             }
         });
         adapter.submitList(notes);
-
-        view.findViewById(R.id.btn_add_new_note).setOnClickListener(v ->
-                ((Contract) requireActivity()).openNoteToAdd()
-        );
     }
 
     @Override
@@ -96,7 +92,5 @@ public class NoteListFragment extends Fragment {
 
     public interface Contract {
         void openNote(Note note);
-
-        void openNoteToAdd();
     }
 }

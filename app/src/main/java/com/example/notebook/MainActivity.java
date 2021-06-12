@@ -2,6 +2,9 @@ package com.example.notebook;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.notebook.database.Note;
 import com.example.notebook.events.ListUpdateEvent;
 import com.example.notebook.viewModels.NotesViewModel;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -21,13 +25,17 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         NoteFragment.Contract, NewNoteFragment.Contract, EditNoteFragment.Contract {
 
     private static final int LANDSCAPE_BACKSTACK_LIMIT = 1;
-    private static final String STATE_EXTRA_KEY = "State";
+    private static final int HIDE_NOTE_FLAG = 0;
+    private static final String LIST_STATE_EXTRA_KEY = "List state";
+    private static final String NAVIGATION_STATE_EXTRA_KEY = "Navigation tate";
     private static final String PORTRAIT_LIST_TAG = "Portrait list";
     private final FragmentManager fragmentManager = getSupportFragmentManager();
     private NotesViewModel viewModel;
     private boolean isLandscape = false;
     private boolean isListViewDisplayed = true;
+    private boolean isNotesListNavigationActivated = true;
     private boolean needToRestoreList = false;
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,16 +53,70 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
             isLandscape = true;
         }
 
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(this::navigate);
+
         if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(STATE_EXTRA_KEY)) {
-                isListViewDisplayed = savedInstanceState.getBoolean(STATE_EXTRA_KEY);
+            if (savedInstanceState.containsKey(LIST_STATE_EXTRA_KEY)) {
+                isListViewDisplayed = savedInstanceState.getBoolean(LIST_STATE_EXTRA_KEY);
+            }
+
+            if (savedInstanceState.containsKey(NAVIGATION_STATE_EXTRA_KEY)) {
+                isNotesListNavigationActivated = savedInstanceState.getBoolean(NAVIGATION_STATE_EXTRA_KEY);
             }
 
             removeListNoteFragment();
-            restoreState();
+
+            if (isNotesListNavigationActivated) {
+                restoreState();
+            }
         } else {
             initNotesList();
         }
+    }
+
+    private boolean navigate(MenuItem item) {
+        if (item.getItemId() == R.id.notes_bottom_navigation_item) {
+            navigateToNotesList();
+        } else if (item.getItemId() == R.id.new_note_bottom_navigation_item) {
+            navigateToNewNote();
+        } else if (item.getItemId() == R.id.about_app_bottom_navigation_item) {
+            navigateToAboutApp();
+        }
+        return true;
+    }
+
+    private void navigateToNotesList() {
+        removeAllFragments();
+        restoreNotesList();
+        isListViewDisplayed = true;
+        isNotesListNavigationActivated = true;
+    }
+
+    private void navigateToNewNote() {
+        removeAllFragments();
+
+        NewNoteFragment newNoteFragment = new NewNoteFragment();
+
+        fragmentManager.beginTransaction()
+                .add(R.id.full_width_container, newNoteFragment)
+                .commit();
+
+        isListViewDisplayed = false;
+        isNotesListNavigationActivated = false;
+    }
+
+    private void navigateToAboutApp() {
+        removeAllFragments();
+
+        AboutAppFragment aboutAppFragment = new AboutAppFragment();
+
+        fragmentManager.beginTransaction()
+                .add(R.id.full_width_container, aboutAppFragment)
+                .commit();
+
+        isListViewDisplayed = false;
+        isNotesListNavigationActivated = false;
     }
 
     private void restoreState() {
@@ -98,9 +160,8 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     @Override
     public void addNote(Note note) {
         viewModel.insert(note);
-        fragmentManager.popBackStack();
-        handleFragmentListOnReturn();
-        isListViewDisplayed = true;
+        hideKeyboard();
+        bottomNavigationView.setSelectedItemId(R.id.notes_bottom_navigation_item);
     }
 
     @Override
@@ -172,22 +233,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     @Override
-    public void openNoteToAdd() {
-        NewNoteFragment newNoteFragment = new NewNoteFragment();
-
-        if (isLandscape && fragmentManager.getFragments().size() > LANDSCAPE_BACKSTACK_LIMIT) {
-            fragmentManager.popBackStack();
-        }
-
-        fragmentManager.beginTransaction()
-                .replace(R.id.main_fragment_container, newNoteFragment)
-                .addToBackStack(null)
-                .commit();
-
-        isListViewDisplayed = false;
-    }
-
-    @Override
     public void openNoteToChange(Note note) {
         EditNoteFragment editNoteFragment = EditNoteFragment.getInstance(note);
 
@@ -197,6 +242,12 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
                 .commit();
 
         isListViewDisplayed = false;
+    }
+
+    private void removeAllFragments() {
+        for (Fragment fragment : fragmentManager.getFragments()) {
+            fragmentManager.beginTransaction().remove(fragment).commit();
+        }
     }
 
     private void removeListNoteFragment() {
@@ -210,6 +261,16 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(STATE_EXTRA_KEY, isListViewDisplayed);
+        outState.putBoolean(LIST_STATE_EXTRA_KEY, isListViewDisplayed);
+        outState.putBoolean(NAVIGATION_STATE_EXTRA_KEY, isNotesListNavigationActivated);
+    }
+
+    public void hideKeyboard() {
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        View view = getCurrentFocus();
+        if (view == null) {
+            view = new View(this);
+        }
+        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOTE_FLAG);
     }
 }
