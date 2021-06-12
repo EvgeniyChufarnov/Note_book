@@ -2,6 +2,8 @@ package com.example.notebook;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         NoteFragment.Contract, NewNoteFragment.Contract, EditNoteFragment.Contract {
 
     private static final int LANDSCAPE_BACKSTACK_LIMIT = 1;
+    private static final int HIDE_NOTE_FLAG = 0;
     private static final String STATE_EXTRA_KEY = "State";
     private static final String PORTRAIT_LIST_TAG = "Portrait list";
     private final FragmentManager fragmentManager = getSupportFragmentManager();
@@ -101,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         fragmentManager.popBackStack();
         handleFragmentListOnReturn();
         isListViewDisplayed = true;
+        hideKeyboard();
     }
 
     @Override
@@ -211,5 +215,14 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(STATE_EXTRA_KEY, isListViewDisplayed);
+    }
+
+    public void hideKeyboard() {
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        View view = getCurrentFocus();
+        if (view == null) {
+            view = new View(this);
+        }
+        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOTE_FLAG);
     }
 }
