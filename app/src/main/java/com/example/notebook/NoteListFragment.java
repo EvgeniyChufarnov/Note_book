@@ -39,6 +39,7 @@ public class NoteListFragment extends Fragment {
         Bundle arguments = getArguments();
         if (arguments != null && arguments.containsKey(NOTES_EXTRA_KEY)) {
             notes = arguments.getParcelableArrayList(NOTES_EXTRA_KEY);
+            arguments.clear();
         }
 
         return inflater.inflate(R.layout.fragment_notes_list, container, false);
