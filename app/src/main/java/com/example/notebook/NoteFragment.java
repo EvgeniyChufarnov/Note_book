@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.notebook.database.Note;
+import com.example.notebook.utils.Utils;
 
 public class NoteFragment extends Fragment {
     private static final String NOTE_EXTRA_KEY = "note";
@@ -90,7 +91,7 @@ public class NoteFragment extends Fragment {
     private void setViews() {
         title.setText(note.getTitle());
         content.setText(note.getContent());
-        date.setText(note.getDate());
+        date.setText(Utils.dateLongToString(note.getDate()));
     }
 
     @Override

@@ -17,6 +17,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
 import com.example.notebook.database.Note;
+import com.example.notebook.utils.Utils;
 
 public class EditNoteFragment extends Fragment implements DatePickerFragment.DateReceiver {
     private static final String NOTE_EXTRA_KEY = "note";
@@ -54,7 +55,7 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
 
         title.setText(note.getTitle());
         content.setText(note.getContent());
-        date.setText(note.getDate());
+        date.setText(Utils.dateLongToString(note.getDate()));
 
         date.setOnClickListener(this::showDatePickerDialog);
     }
@@ -87,7 +88,7 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
         if (!titleInput.isEmpty() && !contentInput.isEmpty()) {
             note.setTitle(title.getText().toString());
             note.setContent(content.getText().toString());
-            note.setDate(date.getText().toString());
+            note.setDate(Utils.dateStringToLong(date.getText().toString()));
             ((Contract) requireActivity()).changeNote(note);
         } else {
             Toast.makeText(getContext(), R.string.validate_text_fail, Toast.LENGTH_SHORT).show();
@@ -100,8 +101,8 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
     }
 
     @Override
-    public void setDate(String date) {
-        this.date.setText(date);
+    public void setDate(long date) {
+        this.date.setText(Utils.dateLongToString(date));
     }
 
     @Override
