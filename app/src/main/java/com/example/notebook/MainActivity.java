@@ -8,7 +8,6 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.notebook.database.Note;
@@ -26,7 +25,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     private static final int HIDE_NOTE_FLAG = 0;
     private static final String STATE_EXTRA_KEY = "State";
     private static final String PORTRAIT_LIST_TAG = "Portrait list";
-    private final FragmentManager fragmentManager = getSupportFragmentManager();
     private NotesViewModel viewModel;
     private boolean isLandscape = false;
     private boolean isListViewDisplayed = true;
@@ -44,9 +42,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         );
 
         int orientation = getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            isLandscape = true;
-        }
+        isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE;
 
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(STATE_EXTRA_KEY)) {
@@ -61,18 +57,10 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     private void restoreState() {
-        if (isLandscape) {
-            initNotesList();
-        }
-
-        if (isListViewDisplayed) {
-            if (!isLandscape) {
-                initNotesList();
-            }
+        if (!isLandscape && !isListViewDisplayed) {
+            needToRestoreList = true;
         } else {
-            if (!isLandscape) {
-                needToRestoreList = true;
-            }
+            initNotesList();
         }
     }
 
@@ -93,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         int containerId = isLandscape ? R.id.list_fragment_container : R.id.main_fragment_container;
         String tag = isLandscape ? null : PORTRAIT_LIST_TAG;
 
-        fragmentManager.beginTransaction()
+        getSupportFragmentManager().beginTransaction()
                 .add(containerId, noteListFragment, tag)
                 .commit();
     }
@@ -101,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     @Override
     public void addNote(Note note) {
         viewModel.insert(note);
-        fragmentManager.popBackStack();
+        getSupportFragmentManager().popBackStack();
         handleFragmentListOnReturn();
         isListViewDisplayed = true;
         hideKeyboard();
@@ -110,40 +98,40 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     @Override
     public void changeNote(Note note) {
         viewModel.insert(note);
-        fragmentManager.popBackStack();
+        getSupportFragmentManager().popBackStack();
         isListViewDisplayed = false;
     }
 
     @Override
     public void deleteNote(Note note) {
         viewModel.delete(note);
-        fragmentManager.popBackStack();
+        getSupportFragmentManager().popBackStack();
         handleFragmentListOnReturn();
         isListViewDisplayed = true;
     }
 
     @Override
     public void onBackFromNote() {
-        fragmentManager.popBackStack();
+        getSupportFragmentManager().popBackStack();
         handleFragmentListOnReturn();
         isListViewDisplayed = true;
     }
 
     @Override
     public void onBackFromNewNote() {
-        fragmentManager.popBackStack();
+        getSupportFragmentManager().popBackStack();
         handleFragmentListOnReturn();
         isListViewDisplayed = true;
     }
 
     private void handleFragmentListOnReturn() {
-        Fragment fragment = fragmentManager.findFragmentByTag(PORTRAIT_LIST_TAG);
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(PORTRAIT_LIST_TAG);
 
         if (!isLandscape) {
             if (fragment == null) {
                 restoreNotesList();
             } else if (needToRestoreList) {
-                fragmentManager.beginTransaction()
+                getSupportFragmentManager().beginTransaction()
                         .remove(fragment)
                         .commit();
 
@@ -152,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
             }
         } else {
             if (fragment != null) {
-                fragmentManager.beginTransaction()
+                getSupportFragmentManager().beginTransaction()
                         .remove(fragment)
                         .commit();
             }
@@ -163,11 +151,11 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     public void openNote(Note note) {
         NoteFragment noteFragment = NoteFragment.getInstance(note);
 
-        if (isLandscape && fragmentManager.getFragments().size() > LANDSCAPE_BACKSTACK_LIMIT) {
-            fragmentManager.popBackStack();
+        if (isLandscape && getSupportFragmentManager().getFragments().size() > LANDSCAPE_BACKSTACK_LIMIT) {
+            getSupportFragmentManager().popBackStack();
         }
 
-        fragmentManager.beginTransaction()
+        getSupportFragmentManager().beginTransaction()
                 .replace(R.id.main_fragment_container, noteFragment)
                 .addToBackStack(null)
                 .commit();
@@ -179,11 +167,11 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     public void openNoteToAdd() {
         NewNoteFragment newNoteFragment = new NewNoteFragment();
 
-        if (isLandscape && fragmentManager.getFragments().size() > LANDSCAPE_BACKSTACK_LIMIT) {
-            fragmentManager.popBackStack();
+        if (isLandscape && getSupportFragmentManager().getFragments().size() > LANDSCAPE_BACKSTACK_LIMIT) {
+            getSupportFragmentManager().popBackStack();
         }
 
-        fragmentManager.beginTransaction()
+        getSupportFragmentManager().beginTransaction()
                 .replace(R.id.main_fragment_container, newNoteFragment)
                 .addToBackStack(null)
                 .commit();
@@ -195,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     public void openNoteToChange(Note note) {
         EditNoteFragment editNoteFragment = EditNoteFragment.getInstance(note);
 
-        fragmentManager.beginTransaction()
+        getSupportFragmentManager().beginTransaction()
                 .replace(R.id.main_fragment_container, editNoteFragment)
                 .addToBackStack(null)
                 .commit();
@@ -204,9 +192,9 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     private void removeListNoteFragment() {
-        for (Fragment fragment : fragmentManager.getFragments()) {
+        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
             if (fragment instanceof NoteListFragment) {
-                fragmentManager.beginTransaction().remove(fragment).commit();
+                getSupportFragmentManager().beginTransaction().remove(fragment).commit();
             }
         }
     }

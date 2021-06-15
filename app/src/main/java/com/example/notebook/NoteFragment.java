@@ -22,9 +22,9 @@ public class NoteFragment extends Fragment {
     private static final String NOTE_EXTRA_KEY = "note";
     private Note note;
 
-    private TextView title;
-    private TextView content;
-    private TextView date;
+    private TextView titleTextView;
+    private TextView contentTextView;
+    private TextView dateTextView;
 
     public static NoteFragment getInstance(Note note) {
         NoteFragment noteFragment = new NoteFragment();
@@ -36,11 +36,6 @@ public class NoteFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Bundle arguments = getArguments();
-        if (arguments != null && arguments.containsKey(NOTE_EXTRA_KEY)) {
-            note = arguments.getParcelable(NOTE_EXTRA_KEY);
-        }
-
         return inflater.inflate(R.layout.fragment_note, container, false);
     }
 
@@ -48,9 +43,14 @@ public class NoteFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        title = view.findViewById(R.id.tv_note_title);
-        content = view.findViewById(R.id.tv_note_content);
-        date = view.findViewById(R.id.tv_note_date);
+        Bundle arguments = getArguments();
+        if (arguments != null && arguments.containsKey(NOTE_EXTRA_KEY)) {
+            note = arguments.getParcelable(NOTE_EXTRA_KEY);
+        }
+
+        titleTextView = view.findViewById(R.id.tv_note_title);
+        contentTextView = view.findViewById(R.id.tv_note_content);
+        dateTextView = view.findViewById(R.id.tv_note_date);
 
         setViews();
 
@@ -89,9 +89,9 @@ public class NoteFragment extends Fragment {
     }
 
     private void setViews() {
-        title.setText(note.getTitle());
-        content.setText(note.getContent());
-        date.setText(Utils.dateLongToString(note.getDate()));
+        titleTextView.setText(note.getTitle());
+        contentTextView.setText(note.getContent());
+        dateTextView.setText(Utils.dateLongToString(note.getDate()));
     }
 
     @Override

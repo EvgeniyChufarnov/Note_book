@@ -36,17 +36,17 @@ public class NoteListFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Bundle arguments = getArguments();
-        if (arguments != null && arguments.containsKey(NOTES_EXTRA_KEY)) {
-            notes = arguments.getParcelableArrayList(NOTES_EXTRA_KEY);
-        }
-
         return inflater.inflate(R.layout.fragment_notes_list, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        Bundle arguments = getArguments();
+        if (arguments != null && arguments.containsKey(NOTES_EXTRA_KEY)) {
+            notes = arguments.getParcelableArrayList(NOTES_EXTRA_KEY);
+        }
 
         RecyclerView recyclerView = view.findViewById(R.id.rv_notes_list);
         adapter = new NotesListAdapter(new NotesListAdapter.NoteDiff(), this::onListItemClicked);
