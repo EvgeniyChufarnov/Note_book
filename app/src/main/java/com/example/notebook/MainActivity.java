@@ -9,7 +9,6 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.notebook.database.Note;
@@ -95,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
 
         NewNoteFragment newNoteFragment = new NewNoteFragment();
 
-        fragmentManager.beginTransaction()
+        getSupportFragmentManager().beginTransaction()
                 .add(R.id.full_width_container, newNoteFragment)
                 .commit();
 
@@ -108,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
 
         AboutAppFragment aboutAppFragment = new AboutAppFragment();
 
-        fragmentManager.beginTransaction()
+        getSupportFragmentManager().beginTransaction()
                 .add(R.id.full_width_container, aboutAppFragment)
                 .commit();
 
