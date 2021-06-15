@@ -179,13 +179,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         isListViewDisplayed = true;
     }
 
-    @Override
-    public void onBackFromNewNote() {
-        getSupportFragmentManager().popBackStack();
-        handleFragmentListOnReturn();
-        isListViewDisplayed = true;
-    }
-
     private void handleFragmentListOnReturn() {
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(PORTRAIT_LIST_TAG);
 

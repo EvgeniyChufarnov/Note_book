@@ -6,7 +6,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {Note.class}, version = 1, exportSchema = false)
+@Database(entities = {Note.class}, version = 2, exportSchema = false)
 public abstract class NotesDatabase extends RoomDatabase {
     private final static String DATABASE_NAME = "notes_database";
     private static volatile NotesDatabase INSTANCE = null;

@@ -4,19 +4,25 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.notebook.R;
 import com.example.notebook.database.Note;
 import com.example.notebook.utils.Utils;
 
 public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteViewHolder> {
+    private static final int NOTE_WITH_IMAGE_TYPE = 0;
+    private static final int NOTE_WITHOUT_IMAGE_TYPE = 1;
+    private static final String UNKNOWN_TYPE_EXCEPTION_MESSAGE = "Unknown item type";
     private final OnItemClicked clickListener;
 
     public NotesListAdapter(DiffUtil.ItemCallback<Note> diffCallback, OnItemClicked clickListener) {
@@ -27,13 +33,24 @@ public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteVie
     @NonNull
     @Override
     public NoteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new NoteViewHolder(parent, clickListener);
+        switch (viewType) {
+            case NOTE_WITH_IMAGE_TYPE:
+                return new ImageViewHolder(parent, clickListener);
+            case NOTE_WITHOUT_IMAGE_TYPE:
+                return new NoImageViewHolder(parent, clickListener);
+            default: throw new RuntimeException(UNKNOWN_TYPE_EXCEPTION_MESSAGE);
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return (getItem(position).getImageUri() != null) ? NOTE_WITH_IMAGE_TYPE : NOTE_WITHOUT_IMAGE_TYPE;
     }
 
     @Override
     public void onBindViewHolder(NoteViewHolder holder, int position) {
-        Note current = getItem(position);
-        holder.bind(current);
+        Note currentNote = getItem(position);
+        holder.bind(currentNote);
     }
 
     public interface OnItemClicked {
@@ -44,16 +61,16 @@ public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteVie
         void onDeleteClicked(Note note);
     }
 
-    protected static class NoteViewHolder extends RecyclerView.ViewHolder {
+    protected abstract static class NoteViewHolder extends RecyclerView.ViewHolder {
         private final TextView title;
         private final TextView content;
         private final TextView date;
         private final OnItemClicked clickListener;
         private Note note;
 
-        private NoteViewHolder(ViewGroup parent, OnItemClicked clickListener) {
+        private NoteViewHolder(ViewGroup parent, OnItemClicked clickListener, int container) {
             super(LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.notes_list_item, parent, false));
+                    .inflate(container, parent, false));
 
             title = itemView.findViewById(R.id.tv_note_item_title);
             content = itemView.findViewById(R.id.tv_note_item_content);
@@ -89,6 +106,33 @@ public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteVie
             }
 
             return true;
+        }
+    }
+
+    private static class NoImageViewHolder extends NoteViewHolder {
+
+        private NoImageViewHolder(ViewGroup parent, OnItemClicked clickListener) {
+            super(parent, clickListener, R.layout.notes_list_item);
+        }
+    }
+
+    private static class ImageViewHolder extends NoteViewHolder {
+        private final ImageView noteImageView;
+
+        private ImageViewHolder(ViewGroup parent, OnItemClicked clickListener) {
+            super(parent, clickListener, R.layout.notes_list_item_with_image);
+
+            noteImageView = itemView.findViewById(R.id.iv_note_item_image);
+        }
+
+        public void bind(Note note) {
+            super.bind(note);
+
+            try {
+                Glide.with(itemView.getContext()).load(note.imageUri).into(noteImageView);
+            } catch (Exception e) {
+                Toast.makeText(itemView.getContext(), R.string.cant_load_image, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
