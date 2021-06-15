@@ -168,6 +168,11 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     @Override
+    public void deleteNoteFromListFragment(Note note) {
+        viewModel.delete(note);
+    }
+
+    @Override
     public void onBackFromNote() {
         getSupportFragmentManager().popBackStack();
         handleFragmentListOnReturn();
@@ -230,6 +235,12 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
                 .commit();
 
         isListViewDisplayed = false;
+    }
+
+    @Override
+    public void openNoteToChangeFromListFragment(Note note) {
+        openNote(note);
+        openNoteToChange(note);
     }
 
     private void removeAllFragments() {
