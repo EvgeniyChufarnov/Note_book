@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Note Book</string>
+    <string name="validate_text_fail">Все поля должны быть заполнены</string>
+    <string name="new_note">Новая заметка</string>
+    <string name="edit">Редактировать</string>
+    <string name="delete">Удалить</string>
+    <string name="title_hint">Название</string>
+    <string name="save">Сохранить</string>
+    <string name="content_hint">Заметка</string>
 </resources>
