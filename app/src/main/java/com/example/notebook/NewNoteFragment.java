@@ -19,8 +19,8 @@ import androidx.fragment.app.Fragment;
 import com.example.notebook.database.Note;
 
 public class NewNoteFragment extends Fragment {
-    EditText title;
-    EditText content;
+    private EditText titleView;
+    private EditText contentView;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -31,8 +31,8 @@ public class NewNoteFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        title = view.findViewById(R.id.et_edit_new_note_title);
-        content = view.findViewById(R.id.et_edit_new_note_content);
+        titleView = view.findViewById(R.id.et_edit_new_note_title);
+        contentView = view.findViewById(R.id.et_edit_new_note_content);
 
         view.setFocusableInTouchMode(true);
         view.requestFocus();
@@ -67,8 +67,8 @@ public class NewNoteFragment extends Fragment {
     }
 
     private void validateInput() {
-        String titleInput = title.getText().toString();
-        String contentInput = content.getText().toString();
+        String titleInput = titleView.getText().toString();
+        String contentInput = contentView.getText().toString();
 
         if (!titleInput.isEmpty() && !contentInput.isEmpty()) {
             Note note = new Note(titleInput, contentInput);

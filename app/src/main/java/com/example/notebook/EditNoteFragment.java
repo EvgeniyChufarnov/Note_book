@@ -23,9 +23,9 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
     private static final String NOTE_EXTRA_KEY = "note";
     private Note note;
 
-    private TextView title;
-    private TextView content;
-    private TextView date;
+    private TextView titleTextView;
+    private TextView contentTextView;
+    private TextView dateTextView;
 
     public static EditNoteFragment getInstance(Note note) {
         EditNoteFragment noteFragment = new EditNoteFragment();
@@ -37,11 +37,6 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Bundle arguments = getArguments();
-        if (arguments != null && arguments.containsKey(NOTE_EXTRA_KEY)) {
-            note = arguments.getParcelable(NOTE_EXTRA_KEY);
-        }
-
         return inflater.inflate(R.layout.fragment_edit_note, container, false);
     }
 
@@ -49,15 +44,20 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        title = view.findViewById(R.id.et_edit_note_title);
-        content = view.findViewById(R.id.et_edit_note_content);
-        date = view.findViewById(R.id.tv_edit_note_date);
+        Bundle arguments = getArguments();
+        if (arguments != null && arguments.containsKey(NOTE_EXTRA_KEY)) {
+            note = arguments.getParcelable(NOTE_EXTRA_KEY);
+        }
 
-        title.setText(note.getTitle());
-        content.setText(note.getContent());
-        date.setText(Utils.dateLongToString(note.getDate()));
+        titleTextView = view.findViewById(R.id.et_edit_note_title);
+        contentTextView = view.findViewById(R.id.et_edit_note_content);
+        dateTextView = view.findViewById(R.id.tv_edit_note_date);
 
-        date.setOnClickListener(this::showDatePickerDialog);
+        titleTextView.setText(note.getTitle());
+        contentTextView.setText(note.getContent());
+        dateTextView.setText(Utils.dateLongToString(note.getDate()));
+
+        dateTextView.setOnClickListener(this::showDatePickerDialog);
     }
 
     @Override
@@ -82,13 +82,13 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
     }
 
     private void validateInput() {
-        String titleInput = title.getText().toString();
-        String contentInput = content.getText().toString();
+        String titleInput = titleTextView.getText().toString();
+        String contentInput = contentTextView.getText().toString();
 
         if (!titleInput.isEmpty() && !contentInput.isEmpty()) {
-            note.setTitle(title.getText().toString());
-            note.setContent(content.getText().toString());
-            note.setDate(Utils.dateStringToLong(date.getText().toString()));
+            note.setTitle(titleTextView.getText().toString());
+            note.setContent(contentTextView.getText().toString());
+            note.setDate(Utils.dateStringToLong(dateTextView.getText().toString()));
             ((Contract) requireActivity()).changeNote(note);
         } else {
             Toast.makeText(getContext(), R.string.validate_text_fail, Toast.LENGTH_SHORT).show();
@@ -102,7 +102,7 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
 
     @Override
     public void setDate(long date) {
-        this.date.setText(Utils.dateLongToString(date));
+        this.dateTextView.setText(Utils.dateLongToString(date));
     }
 
     @Override
