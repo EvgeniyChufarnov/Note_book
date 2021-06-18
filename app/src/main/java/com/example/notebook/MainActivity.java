@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         handleFragmentListOnReturn();
         isListViewDisplayed = true;
     }
-
+          
     private void handleFragmentListOnReturn() {
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(PORTRAIT_LIST_TAG);
 
