@@ -2,7 +2,6 @@ package com.example.notebook;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,16 +32,6 @@ public class NewNoteFragment extends Fragment {
 
         titleView = view.findViewById(R.id.et_edit_new_note_title);
         contentView = view.findViewById(R.id.et_edit_new_note_content);
-
-        view.setFocusableInTouchMode(true);
-        view.requestFocus();
-        view.setOnKeyListener((v, keyCode, event) -> {
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
-                ((Contract) requireActivity()).onBackFromNewNote();
-                return true;
-            }
-            return false;
-        });
     }
 
     @Override
@@ -88,7 +77,5 @@ public class NewNoteFragment extends Fragment {
 
     public interface Contract {
         void addNote(Note note);
-
-        void onBackFromNewNote();
     }
 }

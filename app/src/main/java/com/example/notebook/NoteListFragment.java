@@ -46,6 +46,7 @@ public class NoteListFragment extends Fragment {
         Bundle arguments = getArguments();
         if (arguments != null && arguments.containsKey(NOTES_EXTRA_KEY)) {
             notes = arguments.getParcelableArrayList(NOTES_EXTRA_KEY);
+            arguments.clear();
         }
 
         RecyclerView recyclerView = view.findViewById(R.id.rv_notes_list);
@@ -58,10 +59,6 @@ public class NoteListFragment extends Fragment {
             }
         });
         adapter.submitList(notes);
-
-        view.findViewById(R.id.btn_add_new_note).setOnClickListener(v ->
-                ((Contract) requireActivity()).openNoteToAdd()
-        );
     }
 
     @Override
@@ -96,7 +93,5 @@ public class NoteListFragment extends Fragment {
 
     public interface Contract {
         void openNote(Note note);
-
-        void openNoteToAdd();
     }
 }

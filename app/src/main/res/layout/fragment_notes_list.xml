@@ -10,13 +10,4 @@
         android:layout_height="match_parent"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btn_add_new_note"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/main_margin"
-        android:contentDescription="@string/new_note"
-        app:srcCompat="@drawable/ic_plus" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
