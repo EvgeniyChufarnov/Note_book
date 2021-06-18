@@ -1,14 +1,10 @@
 package com.example.notebook.database;
 
-import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.util.Calendar;
@@ -37,14 +33,14 @@ public class Note implements Parcelable {
     public String content;
     @ColumnInfo(name = "date")
     public long date;
-    @ColumnInfo(name = "image_uri")
-    public String imageUri;
+    @ColumnInfo(name = "image_path")
+    public String imagePath;
 
-    public Note(String title, String content, String imageUri) {
+    public Note(String title, String content, String imagePath) {
         this.title = title;
         this.content = content;
         this.date = Calendar.getInstance().getTimeInMillis();
-        this.imageUri = (imageUri != null) ? imageUri : NO_IMAGE;
+        this.imagePath = (imagePath != null) ? imagePath : NO_IMAGE;
     }
 
     protected Note(Parcel in) {
@@ -74,8 +70,8 @@ public class Note implements Parcelable {
         this.content = content;
     }
 
-    public Uri getImageUri() {
-        return (!imageUri.equals(NO_IMAGE)) ? Uri.parse(imageUri) : null;
+    public String getImagePath() {
+        return (!imagePath.equals(NO_IMAGE)) ? imagePath : null;
     }
 
     public long getDate() {
@@ -97,6 +93,6 @@ public class Note implements Parcelable {
         dest.writeString(title);
         dest.writeString(content);
         dest.writeLong(date);
-        //dest.writeString(imageUri);
+        dest.writeString(imagePath);
     }
 }

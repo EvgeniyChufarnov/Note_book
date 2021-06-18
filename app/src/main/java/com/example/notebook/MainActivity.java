@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -161,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
 
     @Override
     public void deleteNote(Note note) {
-        viewModel.delete(note);
+        viewModel.delete(note, this::showDeleteFailedMessage);
         getSupportFragmentManager().popBackStack();
         handleFragmentListOnReturn();
         isListViewDisplayed = true;
@@ -169,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
 
     @Override
     public void deleteNoteFromListFragment(Note note) {
-        viewModel.delete(note);
+        viewModel.delete(note, this::showDeleteFailedMessage);
     }
 
     @Override
@@ -257,12 +258,18 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         outState.putBoolean(NAVIGATION_STATE_EXTRA_KEY, isNotesListNavigationActivated);
     }
 
-    public void hideKeyboard() {
+    private void hideKeyboard() {
         InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         View view = getCurrentFocus();
         if (view == null) {
             view = new View(this);
         }
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOTE_FLAG);
+    }
+
+    private void showDeleteFailedMessage() {
+        runOnUiThread(() ->
+                Toast.makeText(this, R.string.couldnt_delete_note, Toast.LENGTH_SHORT).show()
+        );
     }
 }

@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
@@ -38,13 +37,14 @@ public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteVie
                 return new ImageViewHolder(parent, clickListener);
             case NOTE_WITHOUT_IMAGE_TYPE:
                 return new NoImageViewHolder(parent, clickListener);
-            default: throw new RuntimeException(UNKNOWN_TYPE_EXCEPTION_MESSAGE);
+            default:
+                throw new RuntimeException(UNKNOWN_TYPE_EXCEPTION_MESSAGE);
         }
     }
 
     @Override
     public int getItemViewType(int position) {
-        return (getItem(position).getImageUri() != null) ? NOTE_WITH_IMAGE_TYPE : NOTE_WITHOUT_IMAGE_TYPE;
+        return (getItem(position).getImagePath() != null) ? NOTE_WITH_IMAGE_TYPE : NOTE_WITHOUT_IMAGE_TYPE;
     }
 
     @Override
@@ -128,11 +128,7 @@ public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteVie
         public void bind(Note note) {
             super.bind(note);
 
-            try {
-                Glide.with(itemView.getContext()).load(note.imageUri).into(noteImageView);
-            } catch (Exception e) {
-                Toast.makeText(itemView.getContext(), R.string.cant_load_image, Toast.LENGTH_SHORT).show();
-            }
+            Glide.with(itemView.getContext()).load(note.imagePath).into(noteImageView);
         }
     }
 
