@@ -91,25 +91,18 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     private void navigateToNewNote() {
-        removeAllFragments();
-
-        NewNoteFragment newNoteFragment = new NewNoteFragment();
-
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.full_width_container, newNoteFragment)
-                .commit();
-
-        isListViewDisplayed = false;
-        isNotesListNavigationActivated = false;
+        navigateToFragment(new NewNoteFragment());
     }
 
     private void navigateToAboutApp() {
+        navigateToFragment(new AboutAppFragment());
+    }
+
+    private void navigateToFragment(Fragment fragment) {
         removeAllFragments();
 
-        AboutAppFragment aboutAppFragment = new AboutAppFragment();
-
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.full_width_container, aboutAppFragment)
+                .add(R.id.full_width_container, fragment)
                 .commit();
 
         isListViewDisplayed = false;
