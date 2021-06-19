@@ -9,12 +9,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.example.notebook.database.Note;
 import com.example.notebook.utils.Utils;
 
@@ -25,6 +28,7 @@ public class NoteFragment extends Fragment {
     private TextView titleTextView;
     private TextView contentTextView;
     private TextView dateTextView;
+    private ImageView imageContainer;
 
     public static NoteFragment getInstance(Note note) {
         NoteFragment noteFragment = new NoteFragment();
@@ -51,6 +55,7 @@ public class NoteFragment extends Fragment {
         titleTextView = view.findViewById(R.id.tv_note_title);
         contentTextView = view.findViewById(R.id.tv_note_content);
         dateTextView = view.findViewById(R.id.tv_note_date);
+        imageContainer = view.findViewById(R.id.iv_attached_image);
 
         setViews();
 
@@ -92,6 +97,12 @@ public class NoteFragment extends Fragment {
         titleTextView.setText(note.getTitle());
         contentTextView.setText(note.getContent());
         dateTextView.setText(Utils.dateLongToString(note.getDate()));
+
+        try {
+            Glide.with(this).load(note.getImagePath()).into(imageContainer);
+        } catch (Exception e) {
+            Toast.makeText(getContext(), R.string.cant_load_image, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

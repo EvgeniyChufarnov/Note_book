@@ -21,7 +21,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NoteListFragment extends Fragment {
+public class NoteListFragment extends Fragment implements NotesListAdapter.OnItemClicked {
     private static final String NOTES_EXTRA_KEY = "note";
     private NotesListAdapter adapter;
     private List<Note> notes = new ArrayList<>();
@@ -50,7 +50,7 @@ public class NoteListFragment extends Fragment {
         }
 
         RecyclerView recyclerView = view.findViewById(R.id.rv_notes_list);
-        adapter = new NotesListAdapter(new NotesListAdapter.NoteDiff(), this::onListItemClicked);
+        adapter = new NotesListAdapter(new NotesListAdapter.NoteDiff(), this);
         recyclerView.setAdapter(adapter);
         adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
@@ -79,8 +79,19 @@ public class NoteListFragment extends Fragment {
         adapter.submitList(event.notes);
     }
 
-    private void onListItemClicked(Note note) {
+    @Override
+    public void onItemClick(Note note) {
         ((Contract) requireActivity()).openNote(note);
+    }
+
+    @Override
+    public void onEditClicked(Note note) {
+        ((Contract) requireActivity()).openNoteToChangeFromListFragment(note);
+    }
+
+    @Override
+    public void onDeleteClicked(Note note) {
+        ((Contract) requireActivity()).deleteNoteFromListFragment(note);
     }
 
     @Override
@@ -93,5 +104,9 @@ public class NoteListFragment extends Fragment {
 
     public interface Contract {
         void openNote(Note note);
+
+        void openNoteToChangeFromListFragment(Note note);
+
+        void deleteNoteFromListFragment(Note note);
     }
 }

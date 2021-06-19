@@ -5,12 +5,9 @@ import android.os.Parcelable;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Locale;
 
 @Entity(tableName = "notes_table")
 public class Note implements Parcelable {
@@ -25,6 +22,8 @@ public class Note implements Parcelable {
             return new Note[size];
         }
     };
+    public static final String NO_IMAGE = "no_image";
+
     @ColumnInfo(name = "id")
     @PrimaryKey(autoGenerate = true)
     public long id = 0L;
@@ -34,11 +33,14 @@ public class Note implements Parcelable {
     public String content;
     @ColumnInfo(name = "date")
     public long date;
+    @ColumnInfo(name = "image_path")
+    public String imagePath;
 
-    public Note(String title, String content) {
+    public Note(String title, String content, String imagePath) {
         this.title = title;
         this.content = content;
         this.date = Calendar.getInstance().getTimeInMillis();
+        this.imagePath = (imagePath != null) ? imagePath : NO_IMAGE;
     }
 
     protected Note(Parcel in) {
@@ -46,6 +48,7 @@ public class Note implements Parcelable {
         title = in.readString();
         content = in.readString();
         date = in.readLong();
+        imagePath = in.readString();
     }
 
     public long getId() {
@@ -68,6 +71,10 @@ public class Note implements Parcelable {
         this.content = content;
     }
 
+    public String getImagePath() {
+        return (!imagePath.equals(NO_IMAGE)) ? imagePath : null;
+    }
+
     public long getDate() {
         return date;
     }
@@ -87,5 +94,6 @@ public class Note implements Parcelable {
         dest.writeString(title);
         dest.writeString(content);
         dest.writeLong(date);
+        dest.writeString(imagePath);
     }
 }

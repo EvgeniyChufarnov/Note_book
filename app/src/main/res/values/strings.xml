@@ -11,4 +11,8 @@
     <string name="new_one">Новая заметка</string>
     <string name="about">О приложении</string>
     <string name="about_app_text">Здесь могла быть ваша реклама</string>
+    <string name="attach">Прикрепить</string>
+    <string name="cant_load_image">Не удалось загрузить картинку</string>
+    <string name="unable_to_download">Невозможно загрузить картинку</string>
+    <string name="couldnt_delete_note">Не удалось удалить заметку</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.example.notebook.viewModels;
 
 import android.app.Application;
+import android.content.Context;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -33,7 +34,7 @@ public class NotesViewModel extends AndroidViewModel {
         repository.insert(note);
     }
 
-    public void delete(Note note) {
-        repository.delete(note);
+    public void delete(Note note, NotesRepository.OnDeleteFailedCallback callback) {
+        repository.delete(note, callback);
     }
 }

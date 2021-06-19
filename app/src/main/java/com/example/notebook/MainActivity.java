@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -90,25 +91,18 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     private void navigateToNewNote() {
-        removeAllFragments();
-
-        NewNoteFragment newNoteFragment = new NewNoteFragment();
-
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.full_width_container, newNoteFragment)
-                .commit();
-
-        isListViewDisplayed = false;
-        isNotesListNavigationActivated = false;
+        navigateToFragment(new NewNoteFragment());
     }
 
     private void navigateToAboutApp() {
+        navigateToFragment(new AboutAppFragment());
+    }
+
+    private void navigateToFragment(Fragment fragment) {
         removeAllFragments();
 
-        AboutAppFragment aboutAppFragment = new AboutAppFragment();
-
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.full_width_container, aboutAppFragment)
+                .add(R.id.full_width_container, fragment)
                 .commit();
 
         isListViewDisplayed = false;
@@ -161,10 +155,15 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
 
     @Override
     public void deleteNote(Note note) {
-        viewModel.delete(note);
+        viewModel.delete(note, this::showDeleteFailedMessage);
         getSupportFragmentManager().popBackStack();
         handleFragmentListOnReturn();
         isListViewDisplayed = true;
+    }
+
+    @Override
+    public void deleteNoteFromListFragment(Note note) {
+        viewModel.delete(note, this::showDeleteFailedMessage);
     }
 
     @Override
@@ -173,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         handleFragmentListOnReturn();
         isListViewDisplayed = true;
     }
-
+          
     private void handleFragmentListOnReturn() {
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(PORTRAIT_LIST_TAG);
 
@@ -225,6 +224,12 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         isListViewDisplayed = false;
     }
 
+    @Override
+    public void openNoteToChangeFromListFragment(Note note) {
+        openNote(note);
+        openNoteToChange(note);
+    }
+
     private void removeAllFragments() {
         for (Fragment fragment : getSupportFragmentManager().getFragments()) {
             getSupportFragmentManager().beginTransaction().remove(fragment).commit();
@@ -246,12 +251,18 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         outState.putBoolean(NAVIGATION_STATE_EXTRA_KEY, isNotesListNavigationActivated);
     }
 
-    public void hideKeyboard() {
+    private void hideKeyboard() {
         InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         View view = getCurrentFocus();
         if (view == null) {
             view = new View(this);
         }
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOTE_FLAG);
+    }
+
+    private void showDeleteFailedMessage() {
+        runOnUiThread(() ->
+                Toast.makeText(this, R.string.couldnt_delete_note, Toast.LENGTH_SHORT).show()
+        );
     }
 }

@@ -8,6 +8,7 @@ import com.example.notebook.database.Note;
 import com.example.notebook.database.NotesDao;
 import com.example.notebook.database.NotesDatabase;
 
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,9 +36,23 @@ public class NotesRepository {
         );
     }
 
-    public void delete(Note note) {
-        databaseWriteExecutor.execute(() ->
-                notesDao.delete(note)
+    public void delete(Note note, OnDeleteFailedCallback callback) {
+        databaseWriteExecutor.execute(() -> {
+                    if (tryToDeleteImage(note)) {
+                        notesDao.delete(note);
+                    } else {
+                        callback.onDeleteFailed();
+                    }
+                }
         );
+    }
+
+    private boolean tryToDeleteImage(Note note) {
+        if (note.getImagePath() == null) return true;
+        return new File(note.getImagePath()).delete();
+    }
+
+    public interface OnDeleteFailedCallback {
+        void onDeleteFailed();
     }
 }
