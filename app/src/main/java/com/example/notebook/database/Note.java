@@ -48,6 +48,7 @@ public class Note implements Parcelable {
         title = in.readString();
         content = in.readString();
         date = in.readLong();
+        imagePath = in.readString();
     }
 
     public long getId() {
