@@ -16,7 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
-import com.example.notebook.database.Note;
+import com.example.notebook.data.Note;
 import com.example.notebook.utils.Utils;
 
 public class EditNoteFragment extends Fragment implements DatePickerFragment.DateReceiver {
@@ -26,6 +26,7 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
     private TextView titleTextView;
     private TextView contentTextView;
     private TextView dateTextView;
+    private boolean isDateChanged = false;
 
     public static EditNoteFragment getInstance(Note note) {
         EditNoteFragment noteFragment = new EditNoteFragment();
@@ -82,14 +83,16 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
     }
 
     private void validateInput() {
-        String titleInput = titleTextView.getText().toString();
-        String contentInput = contentTextView.getText().toString();
+        String titleInput = titleTextView.getText().toString().trim();
+        String contentInput = contentTextView.getText().toString().trim();
 
         if (!titleInput.isEmpty() && !contentInput.isEmpty()) {
             note.setTitle(titleTextView.getText().toString());
             note.setContent(contentTextView.getText().toString());
-            note.setDate(Utils.dateStringToLong(dateTextView.getText().toString()));
-            ((Contract) requireActivity()).changeNote(note);
+            if (isDateChanged) {
+                note.setDate(Utils.dateStringToLong(dateTextView.getText().toString()));
+            }
+            ((Contract) requireActivity()).updateNote(note);
         } else {
             Toast.makeText(getContext(), R.string.validate_text_fail, Toast.LENGTH_SHORT).show();
         }
@@ -103,6 +106,7 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
     @Override
     public void setDate(long date) {
         this.dateTextView.setText(Utils.dateLongToString(date));
+        isDateChanged = true;
     }
 
     @Override
@@ -114,6 +118,6 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
     }
 
     public interface Contract {
-        void changeNote(Note note);
+        void updateNote(Note note);
     }
 }

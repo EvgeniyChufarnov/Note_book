@@ -1,15 +1,14 @@
-package com.example.notebook.database;
+package com.example.notebook.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.Calendar;
+import java.util.UUID;
 
-@Entity(tableName = "notes_table")
 public class Note implements Parcelable {
     public static final Creator<Note> CREATOR = new Creator<Note>() {
         @Override
@@ -22,35 +21,33 @@ public class Note implements Parcelable {
             return new Note[size];
         }
     };
-    public static final String NO_IMAGE = "no_image";
 
-    @ColumnInfo(name = "id")
-    @PrimaryKey(autoGenerate = true)
-    public long id = 0L;
-    @ColumnInfo(name = "title")
+    public String id;
     public String title;
-    @ColumnInfo(name = "content")
     public String content;
-    @ColumnInfo(name = "date")
     public long date;
-    @ColumnInfo(name = "image_path")
     public String imagePath;
 
-    public Note(String title, String content, String imagePath) {
+    public Note() {
+    }
+
+    public Note(@NonNull String title, @NonNull String content, @Nullable String imagePath) {
+        this.id = UUID.randomUUID().toString();
         this.title = title;
         this.content = content;
         this.date = Calendar.getInstance().getTimeInMillis();
-        this.imagePath = (imagePath != null) ? imagePath : NO_IMAGE;
+        this.imagePath = imagePath;
     }
 
     protected Note(Parcel in) {
-        id = in.readLong();
+        id = in.readString();
         title = in.readString();
         content = in.readString();
         date = in.readLong();
+        imagePath = in.readString();
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
@@ -71,7 +68,7 @@ public class Note implements Parcelable {
     }
 
     public String getImagePath() {
-        return (!imagePath.equals(NO_IMAGE)) ? imagePath : null;
+        return imagePath;
     }
 
     public long getDate() {
@@ -89,7 +86,7 @@ public class Note implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(id);
+        dest.writeString(id);
         dest.writeString(title);
         dest.writeString(content);
         dest.writeLong(date);

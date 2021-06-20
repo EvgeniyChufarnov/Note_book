@@ -8,20 +8,19 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.notebook.database.Note;
-import com.example.notebook.events.ListUpdateEvent;
+import com.example.notebook.data.Note;
 import com.example.notebook.viewModels.NotesViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 
-import org.greenrobot.eventbus.EventBus;
+import java.util.Objects;
 
-import java.util.ArrayList;
-
-public class MainActivity extends AppCompatActivity implements NoteListFragment.Contract,
+public class MainActivity extends AppCompatActivity implements NotesListFragment.Contract,
         NoteFragment.Contract, NewNoteFragment.Contract, EditNoteFragment.Contract {
 
     private static final int LANDSCAPE_BACKSTACK_LIMIT = 1;
@@ -43,15 +42,13 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
 
         viewModel = new ViewModelProvider(this).get(NotesViewModel.class);
 
-        viewModel.getAllNotes().observe(this, notes ->
-                EventBus.getDefault().post(new ListUpdateEvent(notes))
-        );
-
         int orientation = getResources().getConfiguration().orientation;
         isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE;
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(this::navigate);
+
+        setUpAppBar();
 
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(LIST_STATE_EXTRA_KEY)) {
@@ -72,6 +69,12 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         }
     }
 
+    private void setUpAppBar() {
+        ActionBar appbar = getSupportActionBar();
+        assert appbar != null;
+        appbar.setTitle(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getDisplayName());
+    }
+
     private boolean navigate(MenuItem item) {
         if (item.getItemId() == R.id.notes_bottom_navigation_item) {
             navigateToNotesList();
@@ -85,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
 
     private void navigateToNotesList() {
         removeAllFragments();
-        restoreNotesList();
+        initNotesList();
         isListViewDisplayed = true;
         isNotesListNavigationActivated = true;
     }
@@ -118,52 +121,35 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     private void initNotesList() {
-        NoteListFragment noteListFragment = new NoteListFragment();
-        putNoteListFragmentIntoContainer(noteListFragment);
-    }
+        NotesListFragment notesListFragment = new NotesListFragment();
 
-    private void restoreNotesList() {
-        NoteListFragment noteListFragment = NoteListFragment.getInstance(
-                (ArrayList<Note>) viewModel.getListOfNodes()
-        );
-
-        putNoteListFragmentIntoContainer(noteListFragment);
-    }
-
-    private void putNoteListFragmentIntoContainer(NoteListFragment noteListFragment) {
         int containerId = isLandscape ? R.id.list_fragment_container : R.id.main_fragment_container;
         String tag = isLandscape ? null : PORTRAIT_LIST_TAG;
 
         getSupportFragmentManager().beginTransaction()
-                .add(containerId, noteListFragment, tag)
+                .add(containerId, notesListFragment, tag)
                 .commit();
     }
 
     @Override
-    public void addNote(Note note) {
-        viewModel.insert(note);
+    public void navigateOutFromNewNote() {
         hideKeyboard();
         bottomNavigationView.setSelectedItemId(R.id.notes_bottom_navigation_item);
     }
 
     @Override
-    public void changeNote(Note note) {
-        viewModel.insert(note);
+    public void updateNote(Note note) {
+        viewModel.update(note);
         getSupportFragmentManager().popBackStack();
         isListViewDisplayed = false;
     }
 
     @Override
     public void deleteNote(Note note) {
-        viewModel.delete(note, this::showDeleteFailedMessage);
+        viewModel.delete(note, this::showDeleteFailedMessage, this);
         getSupportFragmentManager().popBackStack();
         handleFragmentListOnReturn();
         isListViewDisplayed = true;
-    }
-
-    @Override
-    public void deleteNoteFromListFragment(Note note) {
-        viewModel.delete(note, this::showDeleteFailedMessage);
     }
 
     @Override
@@ -172,19 +158,19 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         handleFragmentListOnReturn();
         isListViewDisplayed = true;
     }
-          
+
     private void handleFragmentListOnReturn() {
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(PORTRAIT_LIST_TAG);
 
         if (!isLandscape) {
             if (fragment == null) {
-                restoreNotesList();
+                initNotesList();
             } else if (needToRestoreList) {
                 getSupportFragmentManager().beginTransaction()
                         .remove(fragment)
                         .commit();
 
-                restoreNotesList();
+                initNotesList();
                 needToRestoreList = false;
             }
         } else {
@@ -238,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
 
     private void removeListNoteFragment() {
         for (Fragment fragment : getSupportFragmentManager().getFragments()) {
-            if (fragment instanceof NoteListFragment) {
+            if (fragment instanceof NotesListFragment) {
                 getSupportFragmentManager().beginTransaction().remove(fragment).commit();
             }
         }
@@ -261,8 +247,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     private void showDeleteFailedMessage() {
-        runOnUiThread(() ->
-                Toast.makeText(this, R.string.couldnt_delete_note, Toast.LENGTH_SHORT).show()
-        );
+        Toast.makeText(this, R.string.couldnt_delete_note, Toast.LENGTH_SHORT).show();
     }
 }

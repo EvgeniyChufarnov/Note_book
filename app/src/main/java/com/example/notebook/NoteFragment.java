@@ -11,15 +11,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
-import com.example.notebook.database.Note;
+import com.example.notebook.data.Note;
 import com.example.notebook.utils.Utils;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class NoteFragment extends Fragment {
     private static final String NOTE_EXTRA_KEY = "note";
@@ -98,17 +99,17 @@ public class NoteFragment extends Fragment {
         contentTextView.setText(note.getContent());
         dateTextView.setText(Utils.dateLongToString(note.getDate()));
 
-        try {
-            Glide.with(this).load(note.getImagePath()).into(imageContainer);
-        } catch (Exception e) {
-            Toast.makeText(getContext(), R.string.cant_load_image, Toast.LENGTH_SHORT).show();
+        if ((note.imagePath) != null) {
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            StorageReference fsReference = storage.getReferenceFromUrl(note.imagePath);
+            Glide.with(this).load(fsReference).into(imageContainer);
         }
     }
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if (!(getActivity() instanceof NoteListFragment.Contract)) {
+        if (!(getActivity() instanceof NotesListFragment.Contract)) {
             throw new IllegalStateException("Activity must implement NoteFragment.Contract");
         }
     }

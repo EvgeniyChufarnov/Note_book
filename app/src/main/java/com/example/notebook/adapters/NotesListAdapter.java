@@ -15,8 +15,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.notebook.R;
-import com.example.notebook.database.Note;
+import com.example.notebook.data.Note;
 import com.example.notebook.utils.Utils;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteViewHolder> {
     private static final int NOTE_WITH_IMAGE_TYPE = 0;
@@ -128,14 +130,16 @@ public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteVie
         public void bind(Note note) {
             super.bind(note);
 
-            Glide.with(itemView.getContext()).load(note.imagePath).into(noteImageView);
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            StorageReference fsReference = storage.getReferenceFromUrl(note.imagePath);
+            Glide.with(itemView.getContext()).load(fsReference).into(noteImageView);
         }
     }
 
     public static class NoteDiff extends DiffUtil.ItemCallback<Note> {
         @Override
         public boolean areItemsTheSame(@NonNull Note oldItem, @NonNull Note newItem) {
-            return oldItem.getId() == newItem.getId();
+            return oldItem.getId().equals(newItem.getId());
         }
 
         @Override

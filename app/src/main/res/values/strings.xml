@@ -15,4 +15,5 @@
     <string name="cant_load_image">Не удалось загрузить картинку</string>
     <string name="unable_to_download">Невозможно загрузить картинку</string>
     <string name="couldnt_delete_note">Не удалось удалить заметку</string>
+    <string name="log_out">выйти</string>
 </resources>
