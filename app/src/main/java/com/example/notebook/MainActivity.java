@@ -71,8 +71,9 @@ public class MainActivity extends AppCompatActivity implements NotesListFragment
 
     private void setUpAppBar() {
         ActionBar appbar = getSupportActionBar();
-        assert appbar != null;
-        appbar.setTitle(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getDisplayName());
+        if (appbar != null) {
+            appbar.setTitle(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getDisplayName());
+        }
     }
 
     private boolean navigate(MenuItem item) {
