@@ -21,7 +21,6 @@ import com.example.notebook.utils.Utils;
 public class EditNoteFragment extends Fragment {
     private static final String NOTE_EXTRA_KEY = "note";
     private Note note;
-
     private TextView titleTextView;
     private TextView contentTextView;
     private TextView dateTextView;

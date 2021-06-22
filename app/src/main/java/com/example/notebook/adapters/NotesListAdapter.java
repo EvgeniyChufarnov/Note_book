@@ -1,5 +1,6 @@
 package com.example.notebook.adapters;
 
+import android.content.res.Configuration;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -68,6 +69,7 @@ public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteVie
         private final TextView content;
         private final TextView date;
         private final OnItemClicked clickListener;
+        private final boolean isLandscape;
         private Note note;
 
         private NoteViewHolder(ViewGroup parent, OnItemClicked clickListener, int container) {
@@ -78,6 +80,9 @@ public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteVie
             content = itemView.findViewById(R.id.tv_note_item_content);
             date = itemView.findViewById(R.id.tv_note_item_date);
             this.clickListener = clickListener;
+
+            int orientation = parent.getResources().getConfiguration().orientation;
+            isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE;
         }
 
         public void bind(Note note) {
@@ -87,7 +92,10 @@ public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteVie
             date.setText(Utils.dateLongToString(note.getDate()));
 
             itemView.setOnClickListener(v -> clickListener.onItemClick(note));
-            itemView.setOnLongClickListener(this::initPopupMenu);
+
+            if (!isLandscape) {
+                itemView.setOnLongClickListener(this::initPopupMenu);
+            }
         }
 
         private boolean initPopupMenu(View v) {

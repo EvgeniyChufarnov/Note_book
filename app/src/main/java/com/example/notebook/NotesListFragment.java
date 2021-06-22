@@ -2,6 +2,7 @@ package com.example.notebook;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -71,7 +72,9 @@ public class NotesListFragment extends Fragment implements NotesListAdapter.OnIt
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            setHasOptionsMenu(true);
+        }
     }
 
     @Override
