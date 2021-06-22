@@ -13,13 +13,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
 import com.example.notebook.data.Note;
 import com.example.notebook.utils.Utils;
 
-public class EditNoteFragment extends Fragment implements DatePickerFragment.DateReceiver {
+public class EditNoteFragment extends Fragment {
     private static final String NOTE_EXTRA_KEY = "note";
     private Note note;
 
@@ -99,11 +98,11 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
     }
 
     public void showDatePickerDialog(View v) {
-        DialogFragment datePickerFragment = new DatePickerFragment(this);
+        DatePickerFragment datePickerFragment = new DatePickerFragment();
+        datePickerFragment.setDateListener(this::setDate);
         datePickerFragment.show(requireActivity().getSupportFragmentManager(), null);
     }
 
-    @Override
     public void setDate(long date) {
         this.dateTextView.setText(Utils.dateLongToString(date));
         isDateChanged = true;

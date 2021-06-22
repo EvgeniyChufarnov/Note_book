@@ -13,11 +13,14 @@ import java.util.Calendar;
 public class DatePickerFragment extends DialogFragment
         implements DatePickerDialog.OnDateSetListener {
 
-    private final DateReceiver dateReceiver;
+    private DateListener dateListener;
 
-    public DatePickerFragment(DateReceiver dateReceiver) {
+    public DatePickerFragment() {
         super();
-        this.dateReceiver = dateReceiver;
+    }
+
+    public void setDateListener(DateListener dateListener) {
+        this.dateListener = dateListener;
     }
 
     @NonNull
@@ -34,10 +37,10 @@ public class DatePickerFragment extends DialogFragment
     public void onDateSet(DatePicker view, int year, int month, int day) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, month, day);
-        dateReceiver.setDate(calendar.getTimeInMillis());
+        dateListener.setDate(calendar.getTimeInMillis());
     }
 
-    interface DateReceiver {
+    interface DateListener {
         void setDate(long date);
     }
 }
