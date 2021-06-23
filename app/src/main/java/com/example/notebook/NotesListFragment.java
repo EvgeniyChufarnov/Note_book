@@ -23,12 +23,27 @@ import com.example.notebook.data.Note;
 import com.example.notebook.viewModels.NotesListViewModel;
 
 public class NotesListFragment extends Fragment implements NotesListAdapter.OnItemClicked {
+    public static final String NOTE_TO_DELETE_KEY = "note to delete key";
+    public static final String DELETE_DIALOG_TAG = "delete dialog";
     private NotesListAdapter adapter;
     private NotesListViewModel viewModel;
+    private Note noteToDelete = null;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_notes_list, container, false);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            setHasOptionsMenu(true);
+        }
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(DELETE_DIALOG_TAG)) {
+            noteToDelete = savedInstanceState.getParcelable(NOTE_TO_DELETE_KEY);
+        }
     }
 
     @Override
@@ -48,6 +63,17 @@ public class NotesListFragment extends Fragment implements NotesListAdapter.OnIt
         });
 
         viewModel.getNotes().observe(getViewLifecycleOwner(), notes -> adapter.submitList(notes));
+
+        if (noteToDelete != null) {
+            DeleteNoteBottomSheetFragment onDeleteFragment = ((DeleteNoteBottomSheetFragment) requireActivity()
+                    .getSupportFragmentManager()
+                    .findFragmentByTag(DELETE_DIALOG_TAG));
+
+            if (onDeleteFragment != null) {
+                onDeleteFragment.setOnDeleteConfirmedListener(this::onDeleteConfirmed);
+                onDeleteFragment.setOnDeleteCanceledListener(this::onDeleteCanceled);
+            }
+        }
     }
 
     @Override
@@ -62,19 +88,24 @@ public class NotesListFragment extends Fragment implements NotesListAdapter.OnIt
 
     @Override
     public void onDeleteClicked(Note note) {
-        viewModel.delete(note, this::showDeleteFailedMessage, requireContext());
+        noteToDelete = note;
+        DeleteNoteBottomSheetFragment onDeleteFragment = new DeleteNoteBottomSheetFragment();
+        onDeleteFragment.show(requireActivity().getSupportFragmentManager(), DELETE_DIALOG_TAG);
+        onDeleteFragment.setOnDeleteConfirmedListener(this::onDeleteConfirmed);
+        onDeleteFragment.setOnDeleteCanceledListener(this::onDeleteCanceled);
+    }
+
+    public void onDeleteConfirmed() {
+        viewModel.delete(noteToDelete, this::showDeleteFailedMessage, requireContext());
+        noteToDelete = null;
+    }
+
+    public void onDeleteCanceled() {
+        noteToDelete = null;
     }
 
     private void showDeleteFailedMessage() {
         Toast.makeText(requireContext(), R.string.couldnt_delete_note, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            setHasOptionsMenu(true);
-        }
     }
 
     @Override
@@ -94,6 +125,14 @@ public class NotesListFragment extends Fragment implements NotesListAdapter.OnIt
         }
 
         return true;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (noteToDelete != null) {
+            outState.putParcelable(NOTE_TO_DELETE_KEY, noteToDelete);
+        }
     }
 
     @Override

@@ -24,12 +24,14 @@ import com.google.firebase.storage.StorageReference;
 
 public class NoteFragment extends Fragment {
     private static final String NOTE_EXTRA_KEY = "note";
+    public static final String IS_DELETE_DIALOG_SHOWN_KEY = "is delete dialog shown key";
+    public static final String DELETE_DIALOG_TAG = "delete dialog";
     private Note note;
-
     private TextView titleTextView;
     private TextView contentTextView;
     private TextView dateTextView;
     private ImageView imageContainer;
+    private boolean isDeleteDialogShown;
 
     public static NoteFragment getInstance(Note note) {
         NoteFragment noteFragment = new NoteFragment();
@@ -60,6 +62,21 @@ public class NoteFragment extends Fragment {
 
         setViews();
 
+        if (savedInstanceState != null && savedInstanceState.containsKey(IS_DELETE_DIALOG_SHOWN_KEY)) {
+            isDeleteDialogShown = savedInstanceState.getBoolean(IS_DELETE_DIALOG_SHOWN_KEY);
+        }
+
+        if (isDeleteDialogShown) {
+            DeleteNoteBottomSheetFragment onDeleteFragment = ((DeleteNoteBottomSheetFragment) requireActivity()
+                    .getSupportFragmentManager()
+                    .findFragmentByTag(DELETE_DIALOG_TAG));
+
+            if (onDeleteFragment != null) {
+                onDeleteFragment.setOnDeleteConfirmedListener(this::onDeleteNoteConfirmed);
+                onDeleteFragment.setOnDeleteCanceledListener(this::onDeleteNoteCanceled);
+            }
+        }
+
         view.setFocusableInTouchMode(true);
         view.requestFocus();
         view.setOnKeyListener((v, keyCode, event) -> {
@@ -88,10 +105,23 @@ public class NoteFragment extends Fragment {
         if (item.getItemId() == R.id.menu_item_edit_note) {
             ((Contract) requireActivity()).openNoteToChange(note);
         } else if (item.getItemId() == R.id.menu_item_delete_note) {
-            ((Contract) requireActivity()).deleteNote(note);
+            DeleteNoteBottomSheetFragment onDeleteFragment = new DeleteNoteBottomSheetFragment();
+            onDeleteFragment.show(requireActivity().getSupportFragmentManager(), DELETE_DIALOG_TAG);
+            onDeleteFragment.setOnDeleteConfirmedListener(this::onDeleteNoteConfirmed);
+            onDeleteFragment.setOnDeleteCanceledListener(this::onDeleteNoteCanceled);
+            isDeleteDialogShown = true;
         }
 
         return true;
+    }
+
+    private void onDeleteNoteConfirmed() {
+        ((Contract) requireActivity()).deleteNote(note);
+        isDeleteDialogShown = false;
+    }
+
+    private void onDeleteNoteCanceled() {
+        isDeleteDialogShown = false;
     }
 
     private void setViews() {
@@ -104,6 +134,12 @@ public class NoteFragment extends Fragment {
             StorageReference fsReference = storage.getReferenceFromUrl(note.getImagePath());
             Glide.with(this).load(fsReference).into(imageContainer);
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(IS_DELETE_DIALOG_SHOWN_KEY, isDeleteDialogShown);
     }
 
     @Override
