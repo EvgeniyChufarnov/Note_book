@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class FirebaseRepository implements Repository {
-    public static final String ID_KEY = "id";
     public static String collectionName;
     private static volatile FirebaseRepository INSTANCE = null;
     private final FirebaseFirestore database;
@@ -60,39 +59,15 @@ public class FirebaseRepository implements Repository {
 
     @Override
     public void insert(Note note) {
-        database.collection(collectionName).add(note);
-    }
-
-    @Override
-    public void update(Note note) {
-        findNote(note, document -> {
-            database.collection(collectionName).document(document.getId()).delete();
-            database.collection(collectionName).add(note);
-        });
+        database.collection(collectionName).document(note.getId()).set(note);
     }
 
     @Override
     public void delete(Note note) {
-        findNote(note, document ->
-                database.collection(collectionName).document(document.getId()).delete()
-        );
-    }
-
-    private void findNote(Note note, OnNoteFoundListener noteFoundListener) {
-        database.collection(collectionName).whereEqualTo(ID_KEY, note.getId()).get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-
-                    for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
-                        noteFoundListener.onNoteFound(document);
-                    }
-                });
+        database.collection(collectionName).document(note.getId()).delete();
     }
 
     private void sortByDate(List<Note> notes) {
         Collections.sort(notes, (first, second) -> Long.compare(second.getDate(), first.getDate()));
-    }
-
-    private interface OnNoteFoundListener {
-        void onNoteFound(DocumentSnapshot document);
     }
 }

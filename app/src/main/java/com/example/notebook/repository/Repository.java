@@ -9,6 +9,5 @@ import java.util.List;
 public interface Repository {
     LiveData<List<Note>> getNotes();
     void insert(Note note);
-    void update(Note note);
     void delete(Note note);
 }

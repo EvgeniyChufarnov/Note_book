@@ -60,7 +60,7 @@ public class FirestoreRepository {
 
     public void deleteImage(Note note, OnDeleteSuccess onDeleteSuccessListener, OnFail onFailListener, Context context) {
         if (isNetworkConnected(context)) {
-            StorageReference fsReference = storage.getReferenceFromUrl(note.imagePath);
+            StorageReference fsReference = storage.getReferenceFromUrl(note.getImagePath());
             fsReference.delete().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     onDeleteSuccessListener.onSuccess(note);

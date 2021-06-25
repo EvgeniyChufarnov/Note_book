@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements NotesListFragment
 
     @Override
     public void updateNote(Note note) {
-        viewModel.update(note);
+        viewModel.insert(note);
         getSupportFragmentManager().popBackStack();
         isListViewDisplayed = false;
     }

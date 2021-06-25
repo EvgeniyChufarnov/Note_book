@@ -99,9 +99,9 @@ public class NoteFragment extends Fragment {
         contentTextView.setText(note.getContent());
         dateTextView.setText(Utils.dateLongToString(note.getDate()));
 
-        if ((note.imagePath) != null) {
+        if ((note.getImagePath()) != null) {
             FirebaseStorage storage = FirebaseStorage.getInstance();
-            StorageReference fsReference = storage.getReferenceFromUrl(note.imagePath);
+            StorageReference fsReference = storage.getReferenceFromUrl(note.getImagePath());
             Glide.with(this).load(fsReference).into(imageContainer);
         }
     }

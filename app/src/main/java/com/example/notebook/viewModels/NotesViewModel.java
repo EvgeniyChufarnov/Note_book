@@ -23,10 +23,6 @@ public class NotesViewModel extends ViewModel {
         repository.insert(note);
     }
 
-    public void update(Note note) {
-        repository.update(note);
-    }
-
     public void delete(Note note, FirestoreRepository.OnFail errorCallback, Context context) {
         if (note.getImagePath() != null) {
             imageRepo.deleteImage(note, this::deleteFromRepository, errorCallback, context);

@@ -22,11 +22,11 @@ public class Note implements Parcelable {
         }
     };
 
-    public String id;
-    public String title;
-    public String content;
-    public long date;
-    public String imagePath;
+    private String id;
+    private String title;
+    private String content;
+    private long date;
+    private String imagePath;
 
     public Note() {
     }

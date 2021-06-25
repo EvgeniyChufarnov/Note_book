@@ -139,7 +139,7 @@ public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteVie
             super.bind(note);
 
             FirebaseStorage storage = FirebaseStorage.getInstance();
-            StorageReference fsReference = storage.getReferenceFromUrl(note.imagePath);
+            StorageReference fsReference = storage.getReferenceFromUrl(note.getImagePath());
             Glide.with(itemView.getContext()).load(fsReference).into(noteImageView);
         }
     }
