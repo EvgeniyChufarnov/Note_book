@@ -13,19 +13,24 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
-import com.example.notebook.database.Note;
+import com.example.notebook.data.Note;
 import com.example.notebook.utils.Utils;
 
-public class EditNoteFragment extends Fragment implements DatePickerFragment.DateReceiver {
+public class EditNoteFragment extends Fragment {
     private static final String NOTE_EXTRA_KEY = "note";
+    private static final String IS_DATE_DIALOG_SHOWN_KEY = "is date picker shown";
+    private static final String IS_DATE_CHANGED_KEY = "is date changed";
+    private static final String DATE_TEXT_KEY = "date text";
+    private static final String DATE_DIALOG_TAG = "date dialog";
     private Note note;
-
     private TextView titleTextView;
     private TextView contentTextView;
     private TextView dateTextView;
+    private boolean isDateChanged = false;
+    private boolean isDateDialogShown = false;
+    private String restoredDate = null;
 
     public static EditNoteFragment getInstance(Note note) {
         EditNoteFragment noteFragment = new EditNoteFragment();
@@ -41,13 +46,31 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
         Bundle arguments = getArguments();
         if (arguments != null && arguments.containsKey(NOTE_EXTRA_KEY)) {
             note = arguments.getParcelable(NOTE_EXTRA_KEY);
         }
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(IS_DATE_DIALOG_SHOWN_KEY)) {
+            isDateDialogShown = savedInstanceState.getBoolean(IS_DATE_DIALOG_SHOWN_KEY);
+        }
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(IS_DATE_CHANGED_KEY)) {
+            isDateChanged = savedInstanceState.getBoolean(IS_DATE_CHANGED_KEY);
+        }
+
+        if (isDateChanged && savedInstanceState != null && savedInstanceState.containsKey(DATE_TEXT_KEY)) {
+            restoredDate = savedInstanceState.getString(DATE_TEXT_KEY);
+        }
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         titleTextView = view.findViewById(R.id.et_edit_note_title);
         contentTextView = view.findViewById(R.id.et_edit_note_content);
@@ -58,12 +81,20 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
         dateTextView.setText(Utils.dateLongToString(note.getDate()));
 
         dateTextView.setOnClickListener(this::showDatePickerDialog);
-    }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+        if (isDateDialogShown) {
+            DatePickerFragment datePickerFragment = (DatePickerFragment)requireActivity()
+                    .getSupportFragmentManager()
+                    .findFragmentByTag(DATE_DIALOG_TAG);
+
+            if (datePickerFragment != null ) {
+                datePickerFragment.setDateListener(this::setDate);
+            }
+        }
+
+        if (restoredDate != null) {
+            dateTextView.setText(restoredDate);
+        }
     }
 
     @Override
@@ -82,27 +113,42 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
     }
 
     private void validateInput() {
-        String titleInput = titleTextView.getText().toString();
-        String contentInput = contentTextView.getText().toString();
+        String titleInput = titleTextView.getText().toString().trim();
+        String contentInput = contentTextView.getText().toString().trim();
 
         if (!titleInput.isEmpty() && !contentInput.isEmpty()) {
             note.setTitle(titleTextView.getText().toString());
             note.setContent(contentTextView.getText().toString());
-            note.setDate(Utils.dateStringToLong(dateTextView.getText().toString()));
-            ((Contract) requireActivity()).changeNote(note);
+            if (isDateChanged) {
+                note.setDate(Utils.dateStringToLong(dateTextView.getText().toString()));
+            }
+            ((Contract) requireActivity()).updateNote(note);
         } else {
             Toast.makeText(getContext(), R.string.validate_text_fail, Toast.LENGTH_SHORT).show();
         }
     }
 
     public void showDatePickerDialog(View v) {
-        DialogFragment datePickerFragment = new DatePickerFragment(this);
-        datePickerFragment.show(requireActivity().getSupportFragmentManager(), null);
+        DatePickerFragment datePickerFragment = new DatePickerFragment();
+        datePickerFragment.setDateListener(this::setDate);
+        datePickerFragment.show(requireActivity().getSupportFragmentManager(), DATE_DIALOG_TAG);
+        isDateDialogShown = true;
+    }
+
+    public void setDate(long date) {
+        this.dateTextView.setText(Utils.dateLongToString(date));
+        isDateChanged = true;
+        isDateDialogShown = false;
     }
 
     @Override
-    public void setDate(long date) {
-        this.dateTextView.setText(Utils.dateLongToString(date));
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(IS_DATE_DIALOG_SHOWN_KEY, isDateDialogShown);
+        outState.putBoolean(IS_DATE_CHANGED_KEY, isDateChanged);
+        if (isDateChanged) {
+            outState.putString(DATE_TEXT_KEY, dateTextView.getText().toString());
+        }
     }
 
     @Override
@@ -114,6 +160,6 @@ public class EditNoteFragment extends Fragment implements DatePickerFragment.Dat
     }
 
     public interface Contract {
-        void changeNote(Note note);
+        void updateNote(Note note);
     }
 }

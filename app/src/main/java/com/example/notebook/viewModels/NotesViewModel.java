@@ -1,39 +1,37 @@
 package com.example.notebook.viewModels;
 
-import android.app.Application;
+import android.content.Context;
 
-import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModel;
 
-import com.example.notebook.database.Note;
-import com.example.notebook.repository.NotesRepository;
+import com.example.notebook.data.Note;
+import com.example.notebook.repository.FirebaseRepository;
+import com.example.notebook.repository.FirestoreRepository;
+import com.example.notebook.repository.Repository;
 
-import java.util.List;
+public class NotesViewModel extends ViewModel {
 
-public class NotesViewModel extends AndroidViewModel {
+    private final Repository repository;
+    private final FirestoreRepository imageRepo;
 
-    private final NotesRepository repository;
-    private final LiveData<List<Note>> notes;
-
-    public NotesViewModel(Application application) {
-        super(application);
-        repository = new NotesRepository(application);
-        notes = repository.getAllNotes();
-    }
-
-    public LiveData<List<Note>> getAllNotes() {
-        return notes;
-    }
-
-    public List<Note> getListOfNodes() {
-        return notes.getValue();
+    public NotesViewModel() {
+        repository = FirebaseRepository.getInstance();
+        imageRepo = FirestoreRepository.getInstance();
     }
 
     public void insert(Note note) {
         repository.insert(note);
     }
 
-    public void delete(Note note) {
+    public void delete(Note note, FirestoreRepository.OnFail errorCallback, Context context) {
+        if (note.getImagePath() != null) {
+            imageRepo.deleteImage(note, this::deleteFromRepository, errorCallback, context);
+        } else {
+            deleteFromRepository(note);
+        }
+    }
+
+    public void deleteFromRepository(Note note) {
         repository.delete(note);
     }
 }

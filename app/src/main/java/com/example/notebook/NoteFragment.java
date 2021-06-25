@@ -9,14 +9,18 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.notebook.database.Note;
+import com.bumptech.glide.Glide;
+import com.example.notebook.data.Note;
 import com.example.notebook.utils.Utils;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class NoteFragment extends Fragment {
     private static final String NOTE_EXTRA_KEY = "note";
@@ -25,6 +29,7 @@ public class NoteFragment extends Fragment {
     private TextView titleTextView;
     private TextView contentTextView;
     private TextView dateTextView;
+    private ImageView imageContainer;
 
     public static NoteFragment getInstance(Note note) {
         NoteFragment noteFragment = new NoteFragment();
@@ -51,6 +56,7 @@ public class NoteFragment extends Fragment {
         titleTextView = view.findViewById(R.id.tv_note_title);
         contentTextView = view.findViewById(R.id.tv_note_content);
         dateTextView = view.findViewById(R.id.tv_note_date);
+        imageContainer = view.findViewById(R.id.iv_attached_image);
 
         setViews();
 
@@ -92,12 +98,18 @@ public class NoteFragment extends Fragment {
         titleTextView.setText(note.getTitle());
         contentTextView.setText(note.getContent());
         dateTextView.setText(Utils.dateLongToString(note.getDate()));
+
+        if ((note.getImagePath()) != null) {
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            StorageReference fsReference = storage.getReferenceFromUrl(note.getImagePath());
+            Glide.with(this).load(fsReference).into(imageContainer);
+        }
     }
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if (!(getActivity() instanceof NoteListFragment.Contract)) {
+        if (!(getActivity() instanceof NotesListFragment.Contract)) {
             throw new IllegalStateException("Activity must implement NoteFragment.Contract");
         }
     }
