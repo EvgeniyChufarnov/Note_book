@@ -1,151 +1,138 @@
-package com.example.notebook;
+package com.example.notebook
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.res.Configuration;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
+import android.content.Context
+import com.example.notebook.adapters.NotesListAdapter.OnItemClicked
+import com.example.notebook.adapters.NotesListAdapter
+import com.example.notebook.viewModels.NotesListViewModel
+import android.os.Bundle
+import com.example.notebook.R
+import com.example.notebook.NotesListFragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.RecyclerView
+import com.example.notebook.adapters.NotesListAdapter.NoteDiff
+import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
+import com.example.notebook.DeleteNoteBottomSheetFragment
+import com.example.notebook.DeleteNoteBottomSheetFragment.OnDeleteConfirmedListener
+import com.example.notebook.DeleteNoteBottomSheetFragment.OnDeleteCanceledListener
+import com.example.notebook.repository.FirestoreRepository.OnFail
+import android.widget.Toast
+import android.content.Intent
+import android.content.res.Configuration
+import android.view.*
+import androidx.fragment.app.Fragment
+import com.example.notebook.AuthActivity
+import com.example.notebook.data.Note
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.RecyclerView;
+private const val NOTE_TO_DELETE_KEY = "note to delete key"
+private const val DELETE_DIALOG_TAG = "delete dialog"
 
-import com.example.notebook.adapters.NotesListAdapter;
-import com.example.notebook.data.Note;
-import com.example.notebook.viewModels.NotesListViewModel;
+class NotesListFragment : Fragment(), OnItemClicked {
+    private lateinit var adapter: NotesListAdapter
+    private lateinit var viewModel: NotesListViewModel
+    private var noteToDelete: Note? = null
 
-public class NotesListFragment extends Fragment implements NotesListAdapter.OnItemClicked {
-    public static final String NOTE_TO_DELETE_KEY = "note to delete key";
-    public static final String DELETE_DIALOG_TAG = "delete dialog";
-    private NotesListAdapter adapter;
-    private NotesListViewModel viewModel;
-    private Note noteToDelete = null;
-
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_notes_list, container, false);
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_notes_list, container, false)
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            setHasOptionsMenu(true);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            setHasOptionsMenu(true)
         }
-
         if (savedInstanceState != null && savedInstanceState.containsKey(DELETE_DIALOG_TAG)) {
-            noteToDelete = savedInstanceState.getParcelable(NOTE_TO_DELETE_KEY);
+            noteToDelete = savedInstanceState.getParcelable(NOTE_TO_DELETE_KEY)
         }
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        viewModel = new ViewModelProvider(this).get(NotesListViewModel.class);
-
-        RecyclerView recyclerView = view.findViewById(R.id.rv_notes_list);
-        adapter = new NotesListAdapter(new NotesListAdapter.NoteDiff(), this);
-        recyclerView.setAdapter(adapter);
-        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                recyclerView.smoothScrollToPosition(positionStart);
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel = ViewModelProvider(this).get(NotesListViewModel::class.java)
+        val recyclerView: RecyclerView = view.findViewById(R.id.rv_notes_list)
+        adapter = NotesListAdapter(NoteDiff(), this)
+        recyclerView.adapter = adapter
+        adapter.registerAdapterDataObserver(object : AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                recyclerView.smoothScrollToPosition(positionStart)
             }
-        });
-
-        viewModel.getNotes().observe(getViewLifecycleOwner(), notes -> adapter.submitList(notes));
-
+        })
+        viewModel.notes.observe(
+            viewLifecycleOwner,
+            { notes: List<Note?> -> adapter.submitList(notes) })
         if (noteToDelete != null) {
-            DeleteNoteBottomSheetFragment onDeleteFragment = ((DeleteNoteBottomSheetFragment) requireActivity()
-                    .getSupportFragmentManager()
-                    .findFragmentByTag(DELETE_DIALOG_TAG));
-
+            val onDeleteFragment = requireActivity()
+                .supportFragmentManager
+                .findFragmentByTag(DELETE_DIALOG_TAG) as DeleteNoteBottomSheetFragment?
             if (onDeleteFragment != null) {
-                onDeleteFragment.setOnDeleteConfirmedListener(this::onDeleteConfirmed);
-                onDeleteFragment.setOnDeleteCanceledListener(this::onDeleteCanceled);
+                onDeleteFragment.setOnDeleteConfirmedListener(OnDeleteConfirmedListener { onDeleteConfirmed() })
+                onDeleteFragment.setOnDeleteCanceledListener(OnDeleteCanceledListener { onDeleteCanceled() })
             }
         }
     }
 
-    @Override
-    public void onItemClick(Note note) {
-        ((Contract) requireActivity()).openNote(note);
+    override fun onItemClick(note: Note) {
+        (requireActivity() as Contract).openNote(note)
     }
 
-    @Override
-    public void onEditClicked(Note note) {
-        ((Contract) requireActivity()).openNoteToChangeFromListFragment(note);
+    override fun onEditClicked(note: Note) {
+        (requireActivity() as Contract).openNoteToChangeFromListFragment(note)
     }
 
-    @Override
-    public void onDeleteClicked(Note note) {
-        noteToDelete = note;
-        DeleteNoteBottomSheetFragment onDeleteFragment = new DeleteNoteBottomSheetFragment();
-        onDeleteFragment.show(requireActivity().getSupportFragmentManager(), DELETE_DIALOG_TAG);
-        onDeleteFragment.setOnDeleteConfirmedListener(this::onDeleteConfirmed);
-        onDeleteFragment.setOnDeleteCanceledListener(this::onDeleteCanceled);
+    override fun onDeleteClicked(note: Note) {
+        noteToDelete = note
+        val onDeleteFragment = DeleteNoteBottomSheetFragment()
+        onDeleteFragment.show(requireActivity().supportFragmentManager, DELETE_DIALOG_TAG)
+        onDeleteFragment.setOnDeleteConfirmedListener { onDeleteConfirmed() }
+        onDeleteFragment.setOnDeleteCanceledListener { onDeleteCanceled() }
     }
 
-    public void onDeleteConfirmed() {
-        viewModel.delete(noteToDelete, this::showDeleteFailedMessage, requireContext());
-        noteToDelete = null;
+    private fun onDeleteConfirmed() {
+        viewModel.delete(noteToDelete, { showDeleteFailedMessage() }, requireContext())
+        noteToDelete = null
     }
 
-    public void onDeleteCanceled() {
-        noteToDelete = null;
+    private fun onDeleteCanceled() {
+        noteToDelete = null
     }
 
-    private void showDeleteFailedMessage() {
-        Toast.makeText(requireContext(), R.string.couldnt_delete_note, Toast.LENGTH_SHORT).show();
+    private fun showDeleteFailedMessage() {
+        Toast.makeText(requireContext(), R.string.couldnt_delete_note, Toast.LENGTH_SHORT).show()
     }
 
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.log_out_menu, menu);
-        super.onCreateOptionsMenu(menu, inflater);
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.log_out_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_item_log_out) {
-            Intent intent = new Intent(requireContext(), AuthActivity.class);
-            intent.putExtra(AuthActivity.IS_LOGGED_OUT, true);
-            startActivity(intent);
-            viewModel.clearRepository();
-            requireActivity().finish();
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.menu_item_log_out) {
+            val intent = Intent(requireContext(), AuthActivity::class.java)
+            intent.putExtra(AuthActivity.IS_LOGGED_OUT, true)
+            startActivity(intent)
+            viewModel.clearRepository()
+            requireActivity().finish()
         }
-
-        return true;
+        return true
     }
 
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
         if (noteToDelete != null) {
-            outState.putParcelable(NOTE_TO_DELETE_KEY, noteToDelete);
+            outState.putParcelable(NOTE_TO_DELETE_KEY, noteToDelete)
         }
     }
 
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        if (!(getActivity() instanceof Contract)) {
-            throw new IllegalStateException("Activity must implement NoteListFragment.Contract");
-        }
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        check(activity is Contract) { "Activity must implement NoteListFragment.Contract" }
     }
 
-    public interface Contract {
-        void openNote(Note note);
-
-        void openNoteToChangeFromListFragment(Note note);
+    interface Contract {
+        fun openNote(note: Note?)
+        fun openNoteToChangeFromListFragment(note: Note?)
     }
 }
