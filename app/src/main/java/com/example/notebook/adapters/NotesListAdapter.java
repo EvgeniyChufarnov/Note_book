@@ -56,6 +56,10 @@ public class NotesListAdapter extends ListAdapter<Note, NotesListAdapter.NoteVie
         holder.bind(currentNote);
     }
 
+    public Note getNoteByPosition(int position) {
+        return getItem(position);
+    }
+
     public interface OnItemClicked {
         void onItemClick(Note note);
 
