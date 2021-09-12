@@ -20,6 +20,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.view.*
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.ItemTouchHelper
 import com.example.notebook.AuthActivity
 import com.example.notebook.data.Note
 
@@ -60,6 +61,9 @@ class NotesListFragment : Fragment(), OnItemClicked {
                 recyclerView.smoothScrollToPosition(positionStart)
             }
         })
+
+        initItemTouchHelper(recyclerView)
+
         viewModel.notes.observe(
             viewLifecycleOwner,
             { notes: List<Note?> -> adapter.submitList(notes) })
@@ -71,6 +75,34 @@ class NotesListFragment : Fragment(), OnItemClicked {
                 onDeleteFragment.setOnDeleteConfirmedListener(OnDeleteConfirmedListener { onDeleteConfirmed() })
                 onDeleteFragment.setOnDeleteCanceledListener(OnDeleteCanceledListener { onDeleteCanceled() })
             }
+        }
+    }
+
+    private fun initItemTouchHelper(recyclerView: RecyclerView) {
+        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            0,
+            ItemTouchHelper.RIGHT or ItemTouchHelper.LEFT
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                when (direction) {
+                    ItemTouchHelper.RIGHT -> {
+                        onDeleteClicked(adapter.getNoteByPosition(viewHolder.adapterPosition))
+                    }
+                    ItemTouchHelper.LEFT -> {
+                        onEditClicked(adapter.getNoteByPosition(viewHolder.adapterPosition))
+                    }
+                }
+            }
+        }).apply {
+            attachToRecyclerView(recyclerView)
         }
     }
 
@@ -97,6 +129,7 @@ class NotesListFragment : Fragment(), OnItemClicked {
 
     private fun onDeleteCanceled() {
         noteToDelete = null
+        adapter.notifyDataSetChanged()
     }
 
     private fun showDeleteFailedMessage() {
